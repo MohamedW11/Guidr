@@ -1,0 +1,3 @@
+import {useEffect,useState} from "react";
+export function Link({href,children,...props}:{href:string;children:React.ReactNode;[key:string]:any}){return <a href={href} onClick={e=>{e.preventDefault();history.pushState({},'',href);window.dispatchEvent(new PopStateEvent('popstate'))}} {...props}>{children}</a>}
+export function useLocation(){const [loc,setLoc]=useState(location.pathname);useEffect(()=>{const f=()=>setLoc(location.pathname);addEventListener("popstate",f);return()=>removeEventListener("popstate",f)},[]);return [loc,(p:string)=>{history.pushState({},'',p);window.dispatchEvent(new PopStateEvent('popstate'));setLoc(p)}] as const}
