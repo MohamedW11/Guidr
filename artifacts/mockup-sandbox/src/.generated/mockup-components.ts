@@ -12,5 +12,8 @@ export const modules: ModuleMap = {
   "./components/mockups/guidr/Profile.tsx": () => import("../components/mockups/guidr/Profile.tsx"),
   "./components/mockups/guidr/Saved.tsx": () => import("../components/mockups/guidr/Saved.tsx"),
   "./components/mockups/guidr/Signup.tsx": () => import("../components/mockups/guidr/Signup.tsx"),
-  "./components/mockups/guidr/Tutor.tsx": () => import("../components/mockups/guidr/Tutor.tsx")
+  "./components/mockups/guidr/Tutor.tsx": () => import("../components/mockups/guidr/Tutor.tsx"),
+  "./components/mockups/guidr-admin/Lessons.tsx": () => import("../components/mockups/guidr-admin/Lessons.tsx"),
+  "./components/mockups/guidr-admin/Login.tsx": () => import("../components/mockups/guidr-admin/Login.tsx"),
+  "./components/mockups/guidr-admin/Opportunities.tsx": () => import("../components/mockups/guidr-admin/Opportunities.tsx")
 };
