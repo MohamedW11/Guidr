@@ -4,41 +4,41 @@ import { useLocation } from "./_shared/router";
 import { Brand } from "./_shared";
 import "./_group.css";
 
-const steps = [
-  {
-    title: "What grade are you in?",
-    description:
-      "This helps us surface opportunities you’re actually eligible for.",
-    options: ["Grade 9", "Grade 10", "Grade 11", "Grade 12"],
-  },
-  {
-    title: "Where are you based?",
-    description:
-      "We’ll use your city to help you find opportunities close to you.",
-    options: ["Cairo", "Alexandria", "Giza", "Other"],
-  },
-] as const;
+const interests = [
+  "Computer Science",
+  "Engineering",
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Medicine & Healthcare",
+  "Business & Entrepreneurship",
+  "Economics & Finance",
+  "Research",
+  "Leadership",
+  "Public Speaking & Debate",
+  "Law & Politics",
+  "Arts & Design",
+  "Media & Content Creation",
+  "Writing & Literature",
+  "Languages",
+  "Social Impact & Volunteering",
+  "Environment & Sustainability",
+  "Sports & Fitness",
+  "Music & Performing Arts",
+  "History",
+];
 
-export function Onboarding() {
-  const [step, setStep] = useState(0);
+export function Interests() {
   const [selected, setSelected] = useState<string[]>([]);
   const [, setLocation] = useLocation();
-  const currentStep = steps[step];
 
-  const toggleOption = (option: string) => {
+  const toggleInterest = (interest: string) => {
     setSelected((current) =>
-      current.includes(option)
-        ? current.filter((item) => item !== option)
-        : [...current, option],
+      current.includes(interest)
+        ? current.filter((item) => item !== interest)
+        : [...current, interest],
     );
-  };
-
-  const continueStep = () => {
-    if (step < steps.length - 1) {
-      setStep((current) => current + 1);
-    } else {
-      setLocation("/guidr/Interests");
-    }
   };
 
   return (
@@ -61,40 +61,43 @@ export function Onboarding() {
           <div
             style={{
               height: 2,
-              width: `${((step + 1) / steps.length) * 100}%`,
+              width: "100%",
               background: "var(--g-red)",
-              transition: "width .2s ease",
             }}
           />
         </div>
 
         <div className="g-label" style={{ marginTop: 28 }}>
-          Step {step + 1} of {steps.length}
+          Step 3 of 3
         </div>
         <h1 style={{ fontSize: 34, margin: "12px 0 8px" }}>
-          {currentStep.title}
+          What are you curious about?
         </h1>
         <p style={{ fontSize: 12, color: "#92908c", margin: 0 }}>
-          {currentStep.description}
+          Choose all the areas you want to explore. You can always change these
+          later.
         </p>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
             gap: 8,
             margin: "24px 0",
+            maxHeight: 300,
+            overflowY: "auto",
+            paddingRight: 6,
           }}
         >
-          {currentStep.options.map((option) => {
-            const isSelected = selected.includes(option);
+          {interests.map((interest) => {
+            const isSelected = selected.includes(interest);
             return (
               <button
-                key={option}
-                type="button"
+                key={interest}
                 className="g-btn"
+                type="button"
                 aria-pressed={isSelected}
-                onClick={() => toggleOption(option)}
+                onClick={() => toggleInterest(interest)}
                 style={{
                   borderColor: isSelected ? "var(--g-red)" : undefined,
                   background: isSelected ? "var(--g-red)" : undefined,
@@ -103,9 +106,10 @@ export function Onboarding() {
                   justifyContent: "space-between",
                   alignItems: "center",
                   textAlign: "left",
+                  minHeight: 44,
                 }}
               >
-                {option}
+                {interest}
                 {isSelected && <Check size={14} aria-hidden="true" />}
               </button>
             );
@@ -115,15 +119,14 @@ export function Onboarding() {
         <button
           className="g-btn red"
           type="button"
-          onClick={continueStep}
           disabled={selected.length === 0}
+          onClick={() => setLocation("/guidr/Dashboard")}
           style={{
             opacity: selected.length === 0 ? 0.45 : 1,
             cursor: selected.length === 0 ? "not-allowed" : "pointer",
           }}
         >
-          {step === steps.length - 1 ? "Finish setup" : "Continue"}{" "}
-          <ArrowRight size={14} />
+          Finish setup <ArrowRight size={14} />
         </button>
       </div>
     </div>
