@@ -1,6 +1,6 @@
 import { db } from "@workspace/db";
 import { lessonChunksTable, chatMessagesTable, lessonsTable } from "@workspace/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
 
 export async function indexLessonContent(lessonId: string, content: string) {
   // Delete existing chunks for this lesson
@@ -222,7 +222,7 @@ ${contextText}`,
 
   // Dynamic context-aware synthesis fallback if LLM API key is not configured or fetch fails
   if (!aiResponseText) {
-    aiResponseText = buildDynamicFallbackResponse(userMessage, lesson.title, bestChunks, lesson.content);
+    aiResponseText = buildDynamicFallbackResponse(userMessage, lesson.title, bestChunks, lesson.content || "");
   }
 
   // Store assistant message in chat_messages
