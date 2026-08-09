@@ -2,7 +2,8 @@ import { config } from "dotenv";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+const currentDir = typeof __dirname !== "undefined" ? __dirname : process.cwd();
+const repoRoot = path.resolve(currentDir, "../../..");
 config({ path: path.join(repoRoot, ".env") });
 
 import app from "./app.js";
