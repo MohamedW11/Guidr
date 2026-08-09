@@ -12,8 +12,18 @@ if (!process.env.DATABASE_URL) {
 }
 
 const connectionString = process.env.DATABASE_URL || "postgresql://guidr:guidr@localhost:5434/guidr";
+const isProduction = process.env.NODE_ENV === "production";
+const requiresSsl = isProduction || connectionString.includes("sslmode=require") || connectionString.includes("ssl=true");
 
-export const pool = new Pool({ connectionString });
+export const pool = new Pool({
+  connectionString,
+  ...(requiresSsl && !connectionString.includes("sslmode=disable")
+    ? { ssl: { rejectUnauthorized: false } }
+    : {}),
+  max: 10,
+  idleTimeoutMillis: 30000,
+});
+
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
