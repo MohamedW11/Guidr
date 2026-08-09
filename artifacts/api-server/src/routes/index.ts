@@ -1,13 +1,13 @@
 import { Router } from "express";
-import healthRouter from "./health";
-import authRouter from "./auth";
-import studentRouter from "./student";
-import opportunitiesRouter from "./opportunities";
-import lessonsRouter from "./lessons";
-import lessonChatRouter from "./lesson-chat";
-import adminOpportunitiesRouter from "./admin-opportunities";
-import adminLessonsRouter from "./admin-lessons";
-import adminSettingsRouter from "./admin-settings";
+import healthRouter from "./health.js";
+import authRouter from "./auth.js";
+import studentRouter from "./student.js";
+import opportunitiesRouter from "./opportunities.js";
+import lessonsRouter from "./lessons.js";
+import lessonChatRouter from "./lesson-chat.js";
+import adminOpportunitiesRouter from "./admin-opportunities.js";
+import adminLessonsRouter from "./admin-lessons.js";
+import adminSettingsRouter from "./admin-settings.js";
 
 const router = Router();
 

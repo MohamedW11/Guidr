@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { lessonsTable, lessonProgressTable, lessonChunksTable } from "@workspace/db/schema";
 import { eq, and, asc, ne } from "drizzle-orm";
-import { attachUserMiddleware, requireRole } from "../middlewares/auth";
+import { attachUserMiddleware, requireRole } from "../middlewares/auth.js";
 
 const router = Router();
 

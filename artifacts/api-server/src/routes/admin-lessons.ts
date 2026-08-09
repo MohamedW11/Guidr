@@ -2,8 +2,8 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { lessonsTable } from "@workspace/db/schema";
 import { eq, asc } from "drizzle-orm";
-import { requireRole } from "../middlewares/auth";
-import { indexLessonContent } from "../lib/ai/rag";
+import { requireRole } from "../middlewares/auth.js";
+import { indexLessonContent } from "../lib/ai/rag.js";
 
 const router = Router();
 

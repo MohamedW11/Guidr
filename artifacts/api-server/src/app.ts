@@ -1,13 +1,13 @@
-import express, { type Express } from "express";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import pinoHttpModule from "pino-http";
-import router from "./routes";
-import { logger } from "./lib/logger";
+import router from "./routes/index.js";
+import { logger } from "./lib/logger.js";
 
 const pinoHttp = typeof pinoHttpModule === "function" ? pinoHttpModule : (pinoHttpModule as any).pinoHttp || (pinoHttpModule as any).default || pinoHttpModule;
 
-const app: Express = express();
+const app = express();
 
 app.use(
   pinoHttp({
