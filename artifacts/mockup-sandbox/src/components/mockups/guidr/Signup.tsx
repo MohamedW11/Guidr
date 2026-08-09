@@ -74,7 +74,14 @@ export function Signup() {
         credentials: "include",
       });
 
-      const data = await res.json();
+      let data: any = {};
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: "Server error or database connection failed. Please check DATABASE_URL." };
+      }
+
       if (!res.ok) {
         throw new Error(data.message || "Registration failed");
       }

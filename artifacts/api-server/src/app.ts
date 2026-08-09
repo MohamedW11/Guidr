@@ -37,4 +37,12 @@ app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 app.get("/api/healthz", (_req, res) => res.json({ status: "ok" }));
 app.use("/api", router);
 
+// Global JSON error handler
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error("Unhandled API Error:", err);
+  res.status(err.status || 500).json({
+    message: err.message || "An internal server error occurred.",
+  });
+});
+
 export default app;
