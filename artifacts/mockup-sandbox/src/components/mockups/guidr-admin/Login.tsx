@@ -31,11 +31,11 @@ export function Login() {
       });
 
       let data: any = {};
+      const text = await res.text();
       try {
-        const text = await res.text();
         data = text ? JSON.parse(text) : {};
       } catch {
-        data = { message: "Server error or database connection failed. Please check DATABASE_URL." };
+        data = { message: text || "Server error or database connection failed. Please check DATABASE_URL." };
       }
 
       if (!res.ok) {
