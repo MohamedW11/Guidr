@@ -1,4 +1,5 @@
 import { Link } from "./_shared/router";
+import { Brand } from "./_shared";
 import "./_group.css";
 
 export function Landing() {
@@ -11,17 +12,12 @@ export function Landing() {
           justifyContent: "space-between",
         }}
       >
-        <b>
-          <span className="mark" style={{ display: "inline-grid", marginRight: 8 }}>
-            g
-          </span>
-          guidr
-        </b>
+        <Brand dark />
         <div style={{ display: "flex", gap: 20, fontSize: 12 }}>
-          <Link href="/guidr/Login" style={{ color: "#fefcfa", textDecoration: "none" }}>
+          <Link href="/guidr/Login" style={{ color: "#ffffff", textDecoration: "none" }}>
             Log in
           </Link>
-          <Link href="/guidr/Signup" style={{ color: "#fefcfa", textDecoration: "none" }}>
+          <Link href="/guidr/Signup" style={{ color: "#ffffff", textDecoration: "none" }}>
             Sign up
           </Link>
         </div>

@@ -2,32 +2,8 @@ import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { useLocation } from "./_shared/router";
 import { Brand } from "./_shared";
+import { STUDENT_INTERESTS } from "../../../lib/governorates";
 import "./_group.css";
-
-const interests = [
-  "Computer Science",
-  "Engineering",
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Medicine & Healthcare",
-  "Business & Entrepreneurship",
-  "Economics & Finance",
-  "Research",
-  "Leadership",
-  "Public Speaking & Debate",
-  "Law & Politics",
-  "Arts & Design",
-  "Media & Content Creation",
-  "Writing & Literature",
-  "Languages",
-  "Social Impact & Volunteering",
-  "Environment & Sustainability",
-  "Sports & Fitness",
-  "Music & Performing Arts",
-  "History",
-];
 
 export function Interests() {
   const [selected, setSelected] = useState<string[]>([]);
@@ -89,7 +65,7 @@ export function Interests() {
             paddingRight: 6,
           }}
         >
-          {interests.map((interest) => {
+          {STUDENT_INTERESTS.map((interest) => {
             const isSelected = selected.includes(interest);
             return (
               <button

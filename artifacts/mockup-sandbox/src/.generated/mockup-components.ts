@@ -13,7 +13,11 @@ export const modules: ModuleMap = {
   "./components/mockups/guidr/Saved.tsx": () => import("../components/mockups/guidr/Saved.tsx"),
   "./components/mockups/guidr/Signup.tsx": () => import("../components/mockups/guidr/Signup.tsx"),
   "./components/mockups/guidr/Tutor.tsx": () => import("../components/mockups/guidr/Tutor.tsx"),
+  "./components/mockups/guidr-admin/Dashboard.tsx": () => import("../components/mockups/guidr-admin/Dashboard.tsx"),
+  "./components/mockups/guidr-admin/ImageCropperModal.tsx": () => import("../components/mockups/guidr-admin/ImageCropperModal.tsx"),
+  "./components/mockups/guidr-admin/ImageManagerModal.tsx": () => import("../components/mockups/guidr-admin/ImageManagerModal.tsx"),
   "./components/mockups/guidr-admin/Lessons.tsx": () => import("../components/mockups/guidr-admin/Lessons.tsx"),
   "./components/mockups/guidr-admin/Login.tsx": () => import("../components/mockups/guidr-admin/Login.tsx"),
-  "./components/mockups/guidr-admin/Opportunities.tsx": () => import("../components/mockups/guidr-admin/Opportunities.tsx")
+  "./components/mockups/guidr-admin/Opportunities.tsx": () => import("../components/mockups/guidr-admin/Opportunities.tsx"),
+  "./components/mockups/guidr-admin/Settings.tsx": () => import("../components/mockups/guidr-admin/Settings.tsx")
 };

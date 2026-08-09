@@ -1,45 +1,43 @@
-# [Project name]
+# Guidr Education Hub MVP
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A centralized digital platform empowering high school students across Egypt's 27 Governorates with personalized opportunity discovery, academic pathway guidance, and an interactive RAG AI Tutor.
 
-## Run & Operate
+---
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+## 🚀 Run & Operate
 
-## Stack
+### Environment Variables
+Set the following variables in `.env` or system environment:
+- `DATABASE_URL`: PostgreSQL connection string (e.g. `postgresql://guidr:guidr@localhost:5434/guidr`)
+- `PORT`: API server port (default: `8080` or `5000`)
+- `VITE_DEV_PORT`: Frontend Vite dev port (default: `3000`)
+- `GROQ_API_KEY`: Optional Groq API key for live LLM responses (`llama-3.3-70b-versatile`)
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+### Commands
+- `pnpm --filter @workspace/db run push` — Push Drizzle database schema to PostgreSQL
+- `pnpm --filter @workspace/scripts run seed` — Seed initial Admin, Student, Opportunities & Lessons
+- `pnpm --filter @workspace/api-server run dev` — Run Express backend API server
+- `pnpm --filter @workspace/mockup-sandbox run dev` — Run Vite frontend application
+- `pnpm run typecheck` — Full workspace typecheck across all packages
+- `pnpm run build` — Build production bundles for backend and frontend packages
 
-## Where things live
+### 🔑 Demo Accounts (After Running Seed)
+- **Student Portal**: `student@guidred.org` / `StudentPass123!`
+- **Admin Portal**: `admin@guidred.org` / `AdminPass123!`
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+---
 
-## Architecture decisions
+## 🏗️ Architecture & Project Structure
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- `lib/db`: Drizzle ORM PostgreSQL schema for 9 tables (`users`, `student_profiles`, `admin_profiles`, `opportunities`, `saved_opportunities`, `lessons`, `lesson_chunks`, `lesson_progress`, `chat_messages`).
+- `lib/api-spec`: OpenAPI 3.1 contract (`openapi.yaml`) + Orval client hook generator.
+- `artifacts/api-server`: Express 5 REST API backend with HTTP-only cookie auth, bcrypt password security, role guards, and RAG AI Tutor engine (`src/lib/ai/rag.ts`).
+- `artifacts/mockup-sandbox`: React 19 + Vite frontend application with AuthContext session state, 27 Egyptian Governorates, 8 MVP categories, Student Portal, and Admin Portal.
 
-## Product
+---
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+## 🔒 Security & Access Rules
 
-## User preferences
-
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+1. **Authentication**: Cookie session handling (`sid` cookie) with `bcryptjs` password hashing.
+2. **Student Access**: Can browse active opportunities, save/unsave items, complete published lessons, and interact with the AI Tutor. Access to locked or draft lessons returns HTTP 403 Forbidden.
+3. **Admin Access**: Can manage opportunity catalog, soft-delete (archive) opportunities, order & publish curriculum lessons, and edit account credentials. Access to student endpoints redirects or enforces role guards.

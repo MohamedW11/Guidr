@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: guidr-postgres
+    environment:
+      POSTGRES_USER: guidr
+      POSTGRES_PASSWORD: guidr
+      POSTGRES_DB: guidr
+    ports:
+      - "5434:5432"
+    volumes:
+      - guidr_pg_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U guidr -d guidr"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  guidr_pg_data:

@@ -1,64 +1,91 @@
 import { useState } from "react";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, Check } from "lucide-react";
 import { Link, useLocation } from "./_shared/router";
 import { AuthHeader } from "./_shared";
+import { useAuth } from "../../../lib/AuthContext";
+import { EGYPTIAN_GOVERNORATES, STUDENT_INTERESTS } from "../../../lib/governorates";
 import "./_group.css";
 
-const cities = [
-  "Cairo",
-  "Alexandria",
-  "Giza",
-  "Qalyubia",
-  "Port Said",
-  "Suez",
-  "Luxor",
-  "Aswan",
-  "Mansoura",
-  "Tanta",
-  "Ismailia",
-  "Other",
-];
-
 const grades = ["Grade 9", "Grade 10", "Grade 11", "Grade 12"];
-const interests = [
-  "Leadership",
-  "Science",
-  "Technology",
-  "Business",
-  "Writing",
-  "Research",
-];
-
-type FormState = {
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  phone: string;
-  country: string;
-  city: string;
-  grade: string;
-  interests: string;
-  email: string;
-  password: string;
-};
 
 export function Signup() {
   const [, setLocation] = useLocation();
-  const [form, setForm] = useState<FormState>({
-    firstName: "",
-    lastName: "",
-    displayName: "",
-    phone: "",
-    country: "Egypt",
-    city: "",
-    grade: "",
-    interests: "",
-    email: "",
-    password: "",
-  });
+  const { refetchUser } = useAuth();
+  const [step, setStep] = useState(1);
 
-  const update = (field: keyof FormState, value: string) => {
-    setForm((current) => ({ ...current, [field]: value }));
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [school, setSchool] = useState("");
+  const [governorate, setGovernorate] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests((current) =>
+      current.includes(interest) ? current.filter((i) => i !== interest) : [...current, interest],
+    );
+  };
+
+  const handleNextStep1 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!firstName || !lastName || !governorate || !email || !password) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleNextStep2 = () => {
+    setError(null);
+    if (selectedGrade === null) {
+      setError("Please select your grade.");
+      return;
+    }
+    setStep(3);
+  };
+
+  const handleFinalSignup = async () => {
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          firstName,
+          lastName,
+          phone,
+          school,
+          governorate,
+          grade: selectedGrade,
+          interests: selectedInterests,
+        }),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      await refetchUser();
+      setLocation("/guidr/Dashboard");
+    } catch (err: any) {
+      setError(err.message || "Failed to register account");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const selectStyle = { appearance: "none" as const, paddingRight: 36 };
@@ -72,251 +99,264 @@ export function Signup() {
           </Link>
         }
       />
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          setLocation("/guidr/Onboarding");
-        }}
+      <div
         style={{
           width: "min(620px, calc(100% - 40px))",
           margin: "5vh auto",
           paddingBottom: 44,
         }}
       >
-        <div className="g-label">Your next move starts here</div>
-        <h1 style={{ fontSize: 40, lineHeight: 1, margin: "12px 0 8px" }}>
-          Create your account<span style={{ color: "var(--g-red)" }}>.</span>
-        </h1>
-        <p style={{ color: "#9b9995", fontSize: 12, margin: "0 0 28px" }}>
-          A few details help Guidr show you opportunities that fit.
-        </p>
-
-        <div style={{ display: "grid", gap: 15 }}>
+        <div style={{ height: 3, background: "#2a2a2a", borderRadius: 2, marginBottom: 24 }}>
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
+              height: 3,
+              width: `${(step / 3) * 100}%`,
+              background: "var(--g-red)",
+              transition: "width 0.3s ease",
             }}
-          >
-            <label className="field">
-              First name
-              <input
-                required
-                value={form.firstName}
-                onChange={(event) => update("firstName", event.target.value)}
-                placeholder="Mohamed"
-                autoComplete="given-name"
-              />
-            </label>
-            <label className="field">
-              Last name
-              <input
-                required
-                value={form.lastName}
-                onChange={(event) => update("lastName", event.target.value)}
-                placeholder="Ali"
-                autoComplete="family-name"
-              />
-            </label>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
-            }}
-          >
-            <label className="field">
-              Display name
-              <input
-                required
-                value={form.displayName}
-                onChange={(event) =>
-                  update("displayName", event.target.value)
-                }
-                placeholder="Mohamed A."
-                autoComplete="nickname"
-              />
-            </label>
-            <label className="field">
-              Phone number
-              <input
-                required
-                type="tel"
-                value={form.phone}
-                onChange={(event) => update("phone", event.target.value)}
-                placeholder="+20 10 1234 5678"
-                autoComplete="tel"
-              />
-            </label>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
-            }}
-          >
-            <label className="field" style={{ position: "relative" }}>
-              Country
-              <select
-                required
-                value={form.country}
-                onChange={(event) => update("country", event.target.value)}
-                style={selectStyle}
-              >
-                <option value="Egypt">Egypt</option>
-                <option value="Other">Other</option>
-              </select>
-              <ChevronDown
-                size={15}
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: 12,
-                  bottom: 11,
-                  color: "#9b9995",
-                  pointerEvents: "none",
-                }}
-              />
-            </label>
-            <label className="field" style={{ position: "relative" }}>
-              City
-              <select
-                required
-                value={form.city}
-                onChange={(event) => update("city", event.target.value)}
-                style={selectStyle}
-              >
-                <option value="" disabled>
-                  Select your city
-                </option>
-                {cities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={15}
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: 12,
-                  bottom: 11,
-                  color: "#9b9995",
-                  pointerEvents: "none",
-                }}
-              />
-            </label>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
-            }}
-          >
-            <label className="field" style={{ position: "relative" }}>
-              Grade
-              <select
-                required
-                value={form.grade}
-                onChange={(event) => update("grade", event.target.value)}
-                style={selectStyle}
-              >
-                <option value="" disabled>
-                  Select your grade
-                </option>
-                {grades.map((grade) => (
-                  <option key={grade} value={grade}>
-                    {grade}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={15}
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: 12,
-                  bottom: 11,
-                  color: "#9b9995",
-                  pointerEvents: "none",
-                }}
-              />
-            </label>
-            <label className="field" style={{ position: "relative" }}>
-              Main interest
-              <select
-                required
-                value={form.interests}
-                onChange={(event) => update("interests", event.target.value)}
-                style={selectStyle}
-              >
-                <option value="" disabled>
-                  Choose an interest
-                </option>
-                {interests.map((interest) => (
-                  <option key={interest} value={interest}>
-                    {interest}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={15}
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: 12,
-                  bottom: 11,
-                  color: "#9b9995",
-                  pointerEvents: "none",
-                }}
-              />
-            </label>
-          </div>
-
-          <label className="field">
-            Email address
-            <input
-              required
-              type="email"
-              value={form.email}
-              onChange={(event) => update("email", event.target.value)}
-              placeholder="you@school.edu"
-              autoComplete="email"
-            />
-          </label>
-
-          <label className="field">
-            Password
-            <input
-              required
-              type="password"
-              value={form.password}
-              onChange={(event) => update("password", event.target.value)}
-              placeholder="At least 8 characters"
-              autoComplete="new-password"
-            />
-          </label>
-
-          <button className="g-btn red" type="submit">
-            Continue <ArrowRight size={14} />
-          </button>
+          />
         </div>
 
-        <p style={{ fontSize: 11, color: "#9b9995", marginTop: 18 }}>
-          Already have an account?{" "}
-          <Link href="/guidr/Login" style={{ color: "#fefcfa" }}>
-            Log in
-          </Link>
+        <div className="g-label">Step {step} of 3</div>
+        <h1 style={{ fontSize: "clamp(24px, 5vw, 40px)", lineHeight: 1.1, margin: "8px 0 8px" }}>
+          {step === 1 && "Create your account."}
+          {step === 2 && "Select your grade."}
+          {step === 3 && "Choose your interests."}
+        </h1>
+        <p style={{ color: "#9b9995", fontSize: 12, margin: "0 0 28px" }}>
+          {step === 1 && "Start by filling in your basic personal and contact details."}
+          {step === 2 && "This helps us show opportunities matching your eligibility."}
+          {step === 3 && "Select the subjects and areas you are curious about."}
         </p>
-      </form>
+
+        {error && (
+          <div
+            style={{
+              padding: "10px 14px",
+              background: "rgba(220, 38, 38, 0.15)",
+              border: "1px solid rgba(220, 38, 38, 0.4)",
+              borderRadius: 6,
+              color: "#f87171",
+              fontSize: 13,
+              marginBottom: 20,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {step === 1 && (
+          <form onSubmit={handleNextStep1} style={{ display: "grid", gap: 15 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              <label className="field">
+                First name *
+                <input
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Omar"
+                />
+              </label>
+              <label className="field">
+                Last name *
+                <input
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Hassan"
+                />
+              </label>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              <label className="field">
+                Email address *
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="omar@school.edu"
+                />
+              </label>
+              <label className="field">
+                Password *
+                <input
+                  required
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </label>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              <label className="field">
+                Phone number
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+20 120 000 0000"
+                />
+              </label>
+              <label className="field">
+                School name
+                <input
+                  value={school}
+                  onChange={(e) => setSchool(e.target.value)}
+                  placeholder="STEM High School"
+                />
+              </label>
+            </div>
+
+            <label className="field" style={{ position: "relative" }}>
+              Governorate (Egypt) *
+              <select
+                required
+                value={governorate}
+                onChange={(e) => setGovernorate(e.target.value)}
+                style={selectStyle}
+              >
+                <option value="" disabled>
+                  Select governorate (27 options)
+                </option>
+                {EGYPTIAN_GOVERNORATES.map((gov) => (
+                  <option key={gov} value={gov}>
+                    {gov}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={15}
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  right: 12,
+                  bottom: 11,
+                  color: "#9b9995",
+                  pointerEvents: "none",
+                }}
+              />
+            </label>
+
+            <button className="g-btn red" type="submit" style={{ marginTop: 12 }}>
+              Next: Select Grade <ArrowRight size={14} />
+            </button>
+          </form>
+        )}
+
+        {step === 2 && (
+          <div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+              {[9, 10, 11, 12].map((g) => {
+                const isSelected = selectedGrade === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    className="g-btn"
+                    onClick={() => setSelectedGrade(g)}
+                    style={{
+                      borderColor: isSelected ? "var(--g-red)" : undefined,
+                      background: isSelected ? "var(--g-red)" : undefined,
+                      color: isSelected ? "var(--g-paper)" : undefined,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      height: 52,
+                      fontSize: 15,
+                    }}
+                  >
+                    Grade {g}
+                    {isSelected && <Check size={16} />}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                type="button"
+                className="g-btn"
+                onClick={() => setStep(1)}
+                style={{ flex: 1 }}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="g-btn red"
+                onClick={handleNextStep2}
+                style={{ flex: 2 }}
+              >
+                Next: Select Interests <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gap: 10,
+                marginBottom: 24,
+                maxHeight: 320,
+                overflowY: "auto",
+                paddingRight: 6,
+              }}
+            >
+              {STUDENT_INTERESTS.map((interest) => {
+                const isSelected = selectedInterests.includes(interest);
+                return (
+                  <button
+                    key={interest}
+                    type="button"
+                    className="g-btn"
+                    onClick={() => toggleInterest(interest)}
+                    style={{
+                      borderColor: isSelected ? "var(--g-red)" : undefined,
+                      background: isSelected ? "var(--g-red)" : undefined,
+                      color: isSelected ? "var(--g-paper)" : undefined,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      minHeight: 48,
+                      fontSize: 13,
+                      textAlign: "left",
+                    }}
+                  >
+                    {interest}
+                    {isSelected && <Check size={14} />}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                type="button"
+                className="g-btn"
+                onClick={() => setStep(2)}
+                style={{ flex: 1 }}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="g-btn red"
+                disabled={isSubmitting}
+                onClick={handleFinalSignup}
+                style={{ flex: 2 }}
+              >
+                {isSubmitting ? "Creating account..." : "Complete Setup"} <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
