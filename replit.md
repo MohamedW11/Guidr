@@ -41,3 +41,4 @@ Set the following variables in `.env` or system environment:
 1. **Authentication**: Cookie session handling (`sid` cookie) with `bcryptjs` password hashing.
 2. **Student Access**: Can browse active opportunities, save/unsave items, complete published lessons, and interact with the AI Tutor. Access to locked or draft lessons returns HTTP 403 Forbidden.
 3. **Admin Access**: Can manage opportunity catalog, soft-delete (archive) opportunities, order & publish curriculum lessons, and edit account credentials. Access to student endpoints redirects or enforces role guards.
+4. **Vercel Deployment**: Pre-bundled Serverless API handler in `api/index.js` with static frontend fallback in `vercel.json`.
