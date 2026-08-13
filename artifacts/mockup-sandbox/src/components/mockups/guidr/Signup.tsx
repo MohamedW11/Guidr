@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { ArrowRight, ChevronDown, Check } from "lucide-react";
+import { ArrowRight, ChevronDown, Check, Compass } from "lucide-react";
 import { Link, useLocation } from "./_shared/router";
 import { AuthHeader } from "./_shared";
 import { useAuth } from "../../../lib/AuthContext";
 import { EGYPTIAN_GOVERNORATES, STUDENT_INTERESTS } from "../../../lib/governorates";
+import {
+  type Step3Mode,
+  useDiscoveryAssessment,
+  DiscoveryIntro,
+  DiscoveryQuestion,
+  DiscoveryResults,
+  NudgeModal,
+} from "./interest-discovery";
 import "./_group.css";
 
 const grades = ["Grade 9", "Grade 10", "Grade 11", "Grade 12"];
@@ -23,6 +31,12 @@ export function Signup() {
 
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  // Discovery states
+  const [step3Mode, setStep3Mode] = useState<Step3Mode>("choose");
+  const [showNudge, setShowNudge] = useState(false);
+  const [hasSeenDiscoveryPrompt, setHasSeenDiscoveryPrompt] = useState(false);
+  const discovery = useDiscoveryAssessment();
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,9 +66,10 @@ export function Signup() {
     setStep(3);
   };
 
-  const handleFinalSignup = async () => {
+  const handleFinalSignup = async (overrideInterests?: string[]) => {
     setError(null);
     setIsSubmitting(true);
+    const finalInterests = overrideInterests || selectedInterests;
 
     try {
       const res = await fetch("/api/auth/signup", {
@@ -69,7 +84,7 @@ export function Signup() {
           school,
           governorate,
           grade: selectedGrade,
-          interests: selectedInterests,
+          interests: finalInterests,
         }),
         credentials: "include",
       });
@@ -92,6 +107,14 @@ export function Signup() {
       setError(err.message || "Failed to register account");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCompleteSetupClick = () => {
+    if (!hasSeenDiscoveryPrompt && step3Mode === "choose") {
+      setShowNudge(true);
+    } else {
+      handleFinalSignup();
     }
   };
 
@@ -305,64 +328,155 @@ export function Signup() {
 
         {step === 3 && (
           <div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: 10,
-                marginBottom: 24,
-                maxHeight: 320,
-                overflowY: "auto",
-                paddingRight: 6,
-              }}
-            >
-              {STUDENT_INTERESTS.map((interest) => {
-                const isSelected = selectedInterests.includes(interest);
-                return (
+            {step3Mode === "choose" && (
+              <div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    gap: 10,
+                    marginBottom: 16,
+                    maxHeight: 300,
+                    overflowY: "auto",
+                    paddingRight: 6,
+                  }}
+                >
+                  {STUDENT_INTERESTS.map((interest) => {
+                    const isSelected = selectedInterests.includes(interest);
+                    return (
+                      <button
+                        key={interest}
+                        type="button"
+                        className="g-btn"
+                        onClick={() => toggleInterest(interest)}
+                        style={{
+                          borderColor: isSelected ? "var(--g-red)" : undefined,
+                          background: isSelected ? "var(--g-red)" : undefined,
+                          color: isSelected ? "var(--g-paper)" : undefined,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          minHeight: 48,
+                          fontSize: 13,
+                          textAlign: "left",
+                        }}
+                      >
+                        {interest}
+                        {isSelected && <Check size={14} />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Discovery entry banner */}
+                <div
+                  onClick={() => setStep3Mode("discovery_intro")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 16px",
+                    background: "rgba(189, 59, 63, 0.12)",
+                    border: "1px dashed var(--g-red)",
+                    borderRadius: 8,
+                    marginBottom: 24,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#fefcfa" }}>
+                    <Compass size={18} style={{ color: "var(--g-red)" }} />
+                    <span style={{ fontSize: 13, fontWeight: 500 }}>
+                      I'm not sure yet — help me discover my interests
+                    </span>
+                  </div>
+                  <ArrowRight size={14} style={{ color: "var(--g-red)" }} />
+                </div>
+
+                <div style={{ display: "flex", gap: 12 }}>
                   <button
-                    key={interest}
                     type="button"
                     className="g-btn"
-                    onClick={() => toggleInterest(interest)}
-                    style={{
-                      borderColor: isSelected ? "var(--g-red)" : undefined,
-                      background: isSelected ? "var(--g-red)" : undefined,
-                      color: isSelected ? "var(--g-paper)" : undefined,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      minHeight: 48,
-                      fontSize: 13,
-                      textAlign: "left",
-                    }}
+                    onClick={() => setStep(2)}
+                    style={{ flex: 1 }}
                   >
-                    {interest}
-                    {isSelected && <Check size={14} />}
+                    Back
                   </button>
-                );
-              })}
-            </div>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button
-                type="button"
-                className="g-btn"
-                onClick={() => setStep(2)}
-                style={{ flex: 1 }}
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                className="g-btn red"
-                disabled={isSubmitting}
-                onClick={handleFinalSignup}
-                style={{ flex: 2 }}
-              >
-                {isSubmitting ? "Creating account..." : "Complete Setup"} <ArrowRight size={14} />
-              </button>
-            </div>
+                  <button
+                    type="button"
+                    className="g-btn red"
+                    disabled={isSubmitting}
+                    onClick={handleCompleteSetupClick}
+                    style={{ flex: 2 }}
+                  >
+                    {isSubmitting ? "Creating account..." : "Complete Setup"} <ArrowRight size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step3Mode === "discovery_intro" && (
+              <DiscoveryIntro
+                config={discovery.config}
+                onStart={() => setStep3Mode("discovery_questions")}
+                onManualSelect={() => setStep3Mode("choose")}
+              />
+            )}
+
+            {step3Mode === "discovery_questions" && discovery.currentQuestion && (
+              <DiscoveryQuestion
+                question={discovery.currentQuestion}
+                currentIndex={discovery.currentIndex}
+                totalQuestions={discovery.totalQuestions}
+                scaleLabels={discovery.config.scale.labels}
+                currentAnswer={discovery.answers[discovery.currentQuestion.id]}
+                onAnswer={(val) => discovery.setAnswer(discovery.currentQuestion.id, val)}
+                onNext={discovery.nextQuestion}
+                onPrev={discovery.prevQuestion}
+                onSubmit={async () => {
+                  const res = await discovery.submitAssessment();
+                  if (res) {
+                    setStep3Mode("discovery_results");
+                  }
+                }}
+                isScoring={discovery.isScoring}
+                error={discovery.error}
+              />
+            )}
+
+            {step3Mode === "discovery_results" && discovery.scoreResult && (
+              <DiscoveryResults
+                result={discovery.scoreResult}
+                onAccept={(discoveredInterests) => {
+                  setSelectedInterests(discoveredInterests);
+                  setHasSeenDiscoveryPrompt(true);
+                  handleFinalSignup(discoveredInterests);
+                }}
+                onManualSelect={() => setStep3Mode("choose")}
+                onRetake={() => {
+                  discovery.resetAssessment();
+                  setStep3Mode("discovery_questions");
+                }}
+              />
+            )}
           </div>
         )}
+
+        {/* Skip Nudge Modal */}
+        <NudgeModal
+          isOpen={showNudge}
+          onClose={() => setShowNudge(false)}
+          onTryAssessment={() => {
+            setShowNudge(false);
+            setHasSeenDiscoveryPrompt(true);
+            setStep3Mode("discovery_intro");
+          }}
+          onSkip={() => {
+            setShowNudge(false);
+            setHasSeenDiscoveryPrompt(true);
+            handleFinalSignup();
+          }}
+        />
       </div>
     </div>
   );

@@ -2,8 +2,14 @@ import { useState, useEffect } from "react";
 import { Shell } from "./_shared";
 import { useAuth } from "../../../lib/AuthContext";
 import { STUDENT_INTERESTS, EGYPTIAN_GOVERNORATES } from "../../../lib/governorates";
-import { LogOut } from "lucide-react";
+import { LogOut, Compass, X } from "lucide-react";
 import { useLocation } from "./_shared/router";
+import {
+  useDiscoveryAssessment,
+  DiscoveryIntro,
+  DiscoveryQuestion,
+  DiscoveryResults,
+} from "./interest-discovery";
 import "./_group.css";
 
 export function Profile() {
@@ -20,6 +26,11 @@ export function Profile() {
 
   const [toast, setToast] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Interest Discovery retake states
+  const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
+  const [modalMode, setModalMode] = useState<"intro" | "questions" | "results">("intro");
+  const discovery = useDiscoveryAssessment();
 
   useEffect(() => {
     if (user?.studentProfile) {
@@ -48,7 +59,8 @@ export function Profile() {
     }
   };
 
-  const saveProfile = async () => {
+  const saveProfileWithInterests = async (newInterests?: string[]) => {
+    const interestsToSave = newInterests || interests;
     try {
       const res = await fetch("/api/student/profile", {
         method: "PUT",
@@ -60,7 +72,7 @@ export function Profile() {
           school,
           governorate,
           grade,
-          interests,
+          interests: interestsToSave,
         }),
         credentials: "include",
       });
@@ -73,6 +85,8 @@ export function Profile() {
       console.error("Failed to update profile:", err);
     }
   };
+
+  const saveProfile = () => saveProfileWithInterests();
 
   const handleSignOut = async () => {
     await logout();
@@ -157,11 +171,28 @@ export function Profile() {
         </section>
 
         <section className="card" style={{ padding: 22, marginTop: 16, background: "#fff", borderRadius: 8 }}>
-          <h3 style={{ fontSize: 18, marginBottom: 4 }}>Interests & Pathways</h3>
-          <p style={{ fontSize: 12, color: "var(--g-muted)", marginBottom: 14 }}>
-            Shape what shows up on your Dashboard recommendations and in Guidr Tutor.
-          </p>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+            <div>
+              <h3 style={{ fontSize: 18, marginBottom: 4 }}>Interests & Pathways</h3>
+              <p style={{ fontSize: 12, color: "var(--g-muted)", margin: 0 }}>
+                Shape what shows up on your Dashboard recommendations and in Guidr Tutor.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="g-btn small"
+              onClick={() => {
+                discovery.resetAssessment();
+                setModalMode("intro");
+                setShowDiscoveryModal(true);
+              }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, border: "1px dashed var(--g-red)", color: "var(--g-red)" }}
+            >
+              <Compass size={14} /> Retake Assessment
+            </button>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
             {STUDENT_INTERESTS.map((interest) => {
               const active = interests.includes(interest);
               return (
@@ -196,6 +227,101 @@ export function Profile() {
             <LogOut size={14} /> Sign out
           </button>
         </div>
+
+        {/* Retake Discovery Modal */}
+        {showDiscoveryModal && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 9999,
+              background: "rgba(0, 0, 0, 0.8)",
+              backdropFilter: "blur(6px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 20,
+            }}
+          >
+            <div
+              style={{
+                width: "min(580px, 100%)",
+                background: "#181818",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                borderRadius: 12,
+                padding: 28,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
+                color: "#ffffff",
+                position: "relative",
+                maxHeight: "90vh",
+                overflowY: "auto",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setShowDiscoveryModal(false)}
+                style={{
+                  position: "absolute",
+                  top: 20,
+                  right: 20,
+                  background: "none",
+                  border: "none",
+                  color: "#8a8884",
+                  cursor: "pointer",
+                }}
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+
+              {modalMode === "intro" && (
+                <DiscoveryIntro
+                  config={discovery.config}
+                  onStart={() => setModalMode("questions")}
+                  onManualSelect={() => setShowDiscoveryModal(false)}
+                />
+              )}
+
+              {modalMode === "questions" && discovery.currentQuestion && (
+                <DiscoveryQuestion
+                  question={discovery.currentQuestion}
+                  currentIndex={discovery.currentIndex}
+                  totalQuestions={discovery.totalQuestions}
+                  scaleLabels={discovery.config.scale.labels}
+                  currentAnswer={discovery.answers[discovery.currentQuestion.id]}
+                  onAnswer={(val) => discovery.setAnswer(discovery.currentQuestion.id, val)}
+                  onNext={discovery.nextQuestion}
+                  onPrev={discovery.prevQuestion}
+                  onSubmit={async () => {
+                    const res = await discovery.submitAssessment();
+                    if (res) {
+                      setModalMode("results");
+                    }
+                  }}
+                  isScoring={discovery.isScoring}
+                  error={discovery.error}
+                />
+              )}
+
+              {modalMode === "results" && discovery.scoreResult && (
+                <DiscoveryResults
+                  result={discovery.scoreResult}
+                  onAccept={(discoveredInterests) => {
+                    setInterests(discoveredInterests);
+                    saveProfileWithInterests(discoveredInterests);
+                    setShowDiscoveryModal(false);
+                    flash("Profile updated with discovered interests");
+                  }}
+                  onManualSelect={() => setShowDiscoveryModal(false)}
+                  onRetake={() => {
+                    discovery.resetAssessment();
+                    setModalMode("questions");
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        )}
 
         {toast && <div className="ga-toast" style={{ position: "fixed", bottom: 20, right: 20, background: "#333", color: "#fff", padding: "10px 16px", borderRadius: 4 }}>{toast}</div>}
       </div>

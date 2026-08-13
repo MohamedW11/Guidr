@@ -54,6 +54,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/interest-discovery':
+        specifier: workspace:*
+        version: link:../../lib/interest-discovery
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -336,6 +339,12 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
+
+  lib/interest-discovery:
+    devDependencies:
+      '@types/node':
+        specifier: ^25.3.3
+        version: 25.9.5
 
   scripts:
     dependencies:

@@ -5,7 +5,13 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@workspace/db": ["../../lib/db/src/index.ts"],
+      "@workspace/api-zod": ["../../lib/api-zod/src/index.ts"],
+      "@workspace/interest-discovery": ["../../lib/interest-discovery/src/index.ts"]
+    }
   },
   "include": ["src"],
   "references": [
@@ -14,6 +20,9 @@
     },
     {
       "path": "../../lib/api-zod"
+    },
+    {
+      "path": "../../lib/interest-discovery"
     }
   ]
 }

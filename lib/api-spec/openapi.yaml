@@ -13,6 +13,8 @@ tags:
     description: Authentication & user session
   - name: student
     description: Student profile operations
+  - name: interest-discovery
+    description: Interest discovery assessment for onboarding
   - name: opportunities
     description: Opportunity discovery & saving
   - name: lessons
@@ -139,6 +141,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StudentProfile"
+
+  /interest-discovery/config:
+    get:
+      operationId: getInterestDiscoveryConfig
+      tags: [interest-discovery]
+      summary: Get the public interest discovery assessment configuration
+      parameters:
+        - name: version
+          in: query
+          required: false
+          schema:
+            type: string
+            default: v1
+      responses:
+        "200":
+          description: Assessment configuration for the requested version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InterestDiscoveryConfigResponse"
+        "404":
+          description: Unknown assessment version
+
+  /interest-discovery/score:
+    post:
+      operationId: scoreInterestDiscoveryAssessment
+      tags: [interest-discovery]
+      summary: Score interest discovery answers deterministically
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InterestDiscoveryScoreRequest"
+      responses:
+        "200":
+          description: Scored interest discovery results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InterestDiscoveryScoreResponse"
+        "400":
+          description: Invalid answers payload
 
   /opportunities:
     get:
@@ -665,6 +710,104 @@ components:
         adminProfile:
           $ref: "#/components/schemas/AdminProfile"
       required: [id, email, role]
+
+    InterestDiscoveryScale:
+      type: object
+      properties:
+        min:
+          type: integer
+        max:
+          type: integer
+        labels:
+          type: array
+          items:
+            type: string
+          minItems: 5
+          maxItems: 5
+      required: [min, max, labels]
+
+    InterestDiscoveryQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+      required: [id, text]
+
+    InterestDiscoveryResultsCopy:
+      type: object
+      properties:
+        introTitle:
+          type: string
+        introBody:
+          type: string
+        resultsTitle:
+          type: string
+        resultsFooter:
+          type: string
+        disclaimer:
+          type: string
+      required: [introTitle, introBody, resultsTitle, resultsFooter, disclaimer]
+
+    InterestDiscoveryConfigResponse:
+      type: object
+      properties:
+        version:
+          type: string
+        scale:
+          $ref: "#/components/schemas/InterestDiscoveryScale"
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/InterestDiscoveryQuestion"
+        results:
+          $ref: "#/components/schemas/InterestDiscoveryResultsCopy"
+      required: [version, scale, questions, results]
+
+    InterestDiscoveryScoreRequest:
+      type: object
+      properties:
+        version:
+          type: string
+          default: v1
+        answers:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 1
+            maximum: 5
+      required: [answers]
+
+    ScoredInterestResult:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        score:
+          type: number
+      required: [id, label, score]
+
+    InterestDiscoveryScoreResponse:
+      type: object
+      properties:
+        version:
+          type: string
+        topInterests:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoredInterestResult"
+        summarySignals:
+          type: array
+          items:
+            type: string
+        summaryText:
+          type: string
+        disclaimer:
+          type: string
+      required: [version, topInterests, summarySignals, summaryText, disclaimer]
 
     SignupRequest:
       type: object
