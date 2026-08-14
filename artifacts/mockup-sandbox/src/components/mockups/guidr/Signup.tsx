@@ -411,18 +411,20 @@ export function Signup() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    gap: 8,
                     padding: "12px 16px",
-                    background: "rgba(139, 17, 21, 0.12)",
-                    border: "1px dashed var(--g-red)",
+                    background: "var(--g-red)",
+                    border: "1px solid var(--g-red)",
                     borderRadius: 8,
                     marginBottom: 24,
                     cursor: "pointer",
                     transition: "all 0.2s ease",
                   }}
                 >
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--g-red)" }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#ffffff" }}>
                     Discover Your Interests
                   </span>
+                  <ArrowRight size={14} style={{ color: "#ffffff" }} />
                 </div>
 
                 <div style={{ display: "flex", gap: 12 }}>
