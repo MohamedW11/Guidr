@@ -6,11 +6,11 @@ export const v1Config = {
     min: 1,
     max: 5,
     labels: [
-      "Not interested at all",
-      "Not interested",
-      "Not sure",
-      "Interested",
-      "Very interested",
+      "Not at all like me",
+      "A little like me",
+      "Somewhat like me",
+      "Mostly like me",
+      "Very much like me",
     ],
   },
   questions: [
