@@ -1,4 +1,4 @@
-import { Check, Sparkles, RefreshCw } from "lucide-react";
+import { Check, RefreshCw } from "lucide-react";
 import type { ScoreResponse } from "./types";
 
 interface DiscoveryResultsProps {
@@ -14,9 +14,8 @@ export function DiscoveryResults({ result, onAccept, onManualSelect, onRetake }:
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Badge */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--g-red)" }}>
-        <Sparkles size={20} />
-        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#ffffff" }}>
           Assessment Complete
         </span>
       </div>
@@ -33,7 +32,7 @@ export function DiscoveryResults({ result, onAccept, onManualSelect, onRetake }:
 
       {/* Top 3-5 Discovered Interests */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <div className="g-label" style={{ margin: 0 }}>
+        <div className="g-label" style={{ margin: 0, color: "#ffffff" }}>
           Recommended categories for you ({result.topInterests.length})
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
