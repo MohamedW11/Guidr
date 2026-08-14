@@ -181,7 +181,7 @@ export function Opportunities() {
         </div>
 
         {/* Main Grid: Filter Block and Opportunity Cards */}
-        <div className="opp-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24, alignItems: "start" }}>
+        <div className="opp-grid">
           <aside
             style={{
               background: "#fff",
@@ -296,7 +296,7 @@ export function Opportunities() {
             </div>
           </aside>
 
-          <div style={{ margin: 0 }}>
+          <div style={{ margin: 0, minWidth: 0 }}>
             {isLoading ? (
               <div style={{ padding: 40, textAlign: "center", color: "#666" }}>Loading opportunities...</div>
             ) : sortedList.length === 0 ? (
