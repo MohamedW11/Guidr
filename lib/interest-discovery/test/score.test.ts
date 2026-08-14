@@ -7,16 +7,16 @@ import type { AnswerMap } from "../src/types.js";
 describe("Interest Discovery Scoring Engine", () => {
   const config = getInterestDiscoveryConfig("v1");
 
-  test("loads valid V1 configuration with 24 questions", () => {
+  test("loads valid V1 configuration with 36 questions", () => {
     assert.equal(config.version, "v1");
-    assert.equal(config.questions.length, 24);
+    assert.equal(config.questions.length, 36);
     assert.equal(config.signals.length, 19);
     assert.equal(config.interests.length, 22);
   });
 
   test("validates complete and valid answers", () => {
     const validAnswers: AnswerMap = {};
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 36; i++) {
       validAnswers[`q${i}`] = 3;
     }
     const err = validateAnswers(config, validAnswers);
@@ -29,7 +29,7 @@ describe("Interest Discovery Scoring Engine", () => {
     assert.ok(err1?.includes("Missing or invalid answer"));
 
     const invalidValueAnswers: AnswerMap = {};
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 36; i++) {
       invalidValueAnswers[`q${i}`] = 3;
     }
     // @ts-ignore
@@ -40,7 +40,7 @@ describe("Interest Discovery Scoring Engine", () => {
 
   test("scores neutral responses (all 3s) without crashing or wild skew", () => {
     const neutralAnswers: AnswerMap = {};
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 36; i++) {
       neutralAnswers[`q${i}`] = 3;
     }
 
@@ -53,7 +53,7 @@ describe("Interest Discovery Scoring Engine", () => {
 
   test("ranks STEM high when STEM questions have high scores", () => {
     const stemAnswers: AnswerMap = {};
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 36; i++) {
       stemAnswers[`q${i}`] = 1;
     }
     // Q1 (Problem solving), Q3 (Math/Logic), Q4 (Building/Engineering), Q5 (Technology/CS), Q6 (Experimentation)

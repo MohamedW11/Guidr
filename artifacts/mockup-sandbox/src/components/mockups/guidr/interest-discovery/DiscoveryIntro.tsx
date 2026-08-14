@@ -37,7 +37,7 @@ export function DiscoveryIntro({ config, onStart, onManualSelect }: DiscoveryInt
           color: "#c0beba",
         }}
       >
-        <span>24 short questions · 5–7 minutes</span>
+        <span>{config.questions?.length || 36} short questions · 5–7 minutes</span>
       </div>
 
       <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
