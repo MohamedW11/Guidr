@@ -1,4 +1,4 @@
-import { Compass, ArrowRight, X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 
 interface NudgeModalProps {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export function NudgeModal({ isOpen, onTryAssessment, onSkip, onClose }: NudgeMo
         style={{
           width: "min(460px, 100%)",
           background: "#181818",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          border: "1px solid var(--g-red)",
           borderRadius: 12,
           padding: 24,
           boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
@@ -56,9 +56,8 @@ export function NudgeModal({ isOpen, onTryAssessment, onSkip, onClose }: NudgeMo
           <X size={18} />
         </button>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--g-red)" }}>
-          <Compass size={24} />
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#ffffff" }}>
             Interest Discovery
           </span>
         </div>

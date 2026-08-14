@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, ChevronDown, Check, Compass } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, Check } from "lucide-react";
 import { Link, useLocation } from "./_shared/router";
 import { AuthHeader } from "./_shared";
 import { useAuth } from "../../../lib/AuthContext";
@@ -118,6 +118,18 @@ export function Signup() {
     }
   };
 
+  const handleGoBack = () => {
+    if (step === 3 && step3Mode !== "choose") {
+      if (step3Mode === "discovery_questions" && discovery.currentIndex > 0) {
+        discovery.prevQuestion();
+      } else {
+        setStep3Mode("choose");
+      }
+    } else if (step > 1) {
+      setStep(step - 1);
+    }
+  };
+
   const selectStyle = { appearance: "none" as const, paddingRight: 36 };
 
   return (
@@ -136,6 +148,30 @@ export function Signup() {
           paddingBottom: 44,
         }}
       >
+        {(step > 1 || step3Mode !== "choose") && (
+          <button
+            type="button"
+            onClick={handleGoBack}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "none",
+              border: "none",
+              color: "#9b9995",
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+              padding: "0 0 16px 0",
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#9b9995")}
+          >
+            <ArrowLeft size={16} /> Back
+          </button>
+        )}
+
         <div style={{ height: 3, background: "#2a2a2a", borderRadius: 2, marginBottom: 24 }}>
           <div
             style={{
@@ -374,9 +410,9 @@ export function Signup() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between",
+                    justifyContent: "center",
                     padding: "12px 16px",
-                    background: "rgba(189, 59, 63, 0.12)",
+                    background: "rgba(139, 17, 21, 0.12)",
                     border: "1px dashed var(--g-red)",
                     borderRadius: 8,
                     marginBottom: 24,
@@ -384,13 +420,9 @@ export function Signup() {
                     transition: "all 0.2s ease",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#fefcfa" }}>
-                    <Compass size={18} style={{ color: "var(--g-red)" }} />
-                    <span style={{ fontSize: 13, fontWeight: 500 }}>
-                      I'm not sure yet — help me discover my interests
-                    </span>
-                  </div>
-                  <ArrowRight size={14} style={{ color: "var(--g-red)" }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--g-red)" }}>
+                    Discover Your Interests
+                  </span>
                 </div>
 
                 <div style={{ display: "flex", gap: 12 }}>

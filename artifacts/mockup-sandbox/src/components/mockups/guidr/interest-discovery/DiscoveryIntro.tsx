@@ -1,4 +1,3 @@
-import { ArrowRight, Compass, Clock } from "lucide-react";
 import type { PublicConfig } from "./types";
 
 interface DiscoveryIntroProps {
@@ -10,9 +9,8 @@ interface DiscoveryIntroProps {
 export function DiscoveryIntro({ config, onStart, onManualSelect }: DiscoveryIntroProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--g-red)" }}>
-        <Compass size={22} />
-        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#ffffff" }}>
           Guidr Interest Discovery
         </span>
       </div>
@@ -39,7 +37,6 @@ export function DiscoveryIntro({ config, onStart, onManualSelect }: DiscoveryInt
           color: "#c0beba",
         }}
       >
-        <Clock size={14} style={{ color: "var(--g-red)" }} />
         <span>24 short questions · 5–7 minutes</span>
       </div>
 
@@ -48,7 +45,7 @@ export function DiscoveryIntro({ config, onStart, onManualSelect }: DiscoveryInt
           Choose manually
         </button>
         <button type="button" className="g-btn red" onClick={onStart} style={{ flex: 2 }}>
-          Start Assessment <ArrowRight size={14} />
+          Start Assessment
         </button>
       </div>
     </div>
