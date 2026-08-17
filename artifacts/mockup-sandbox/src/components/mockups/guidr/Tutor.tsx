@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, LockKeyhole, ArrowRight, BookOpen, Compass, Target, CheckCircle2 } from "lucide-react";
+import { LockKeyhole, ArrowRight, BookOpen, Compass, Target, CheckCircle2 } from "lucide-react";
 import { Link, useLocation } from "./_shared/router";
 import { Shell } from "./_shared";
 import "./_group.css";
@@ -95,8 +95,28 @@ export function Tutor() {
     fetchLessons();
   }, []);
 
-  // Compute unlock & completion status sequentially across all lessons
   const lessonList = lessons.length > 0 ? lessons : DEFAULT_MOCK_LESSONS;
+
+  // Module-based completion helper
+  const isModuleCompleted = (moduleName: string) => {
+    const modLessons = lessonList.filter(
+      (l) => (l.module || "Know").toLowerCase() === moduleName.toLowerCase()
+    );
+    if (modLessons.length === 0) return false;
+    return modLessons.every((l) => l.completed);
+  };
+
+  const isKnowCompleted = isModuleCompleted("Know");
+  const isPrepareCompleted = isModuleCompleted("Prepare");
+
+  // Module unlock status: Module 1 unlocked; Module 2 unlocked if Module 1 complete; Module 3 unlocked if Module 2 complete
+  const isModuleUnlocked = (moduleName: string) => {
+    const lower = moduleName.toLowerCase();
+    if (lower === "know") return true;
+    if (lower === "prepare") return isKnowCompleted;
+    if (lower === "act") return isKnowCompleted && isPrepareCompleted;
+    return true;
+  };
 
   return (
     <Shell active="Guidr Tutor">
@@ -115,13 +135,14 @@ export function Tutor() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 44 }}>
             {MODULE_DEFINITIONS.map((mod) => {
-              const ModuleIcon = mod.icon;
+              const moduleUnlocked = isModuleUnlocked(mod.id);
+
               // Filter lessons belonging to this module
               const moduleLessons = lessonList.filter(
-                (l) => l.module?.toLowerCase() === mod.id.toLowerCase()
+                (l) => (l.module || "Know").toLowerCase() === mod.id.toLowerCase()
               );
 
-              // If backend didn't return module field properly, fallback to match title list
+              // Fallback matching if backend modules differ
               const displayLessons =
                 moduleLessons.length > 0
                   ? moduleLessons
@@ -133,7 +154,7 @@ export function Tutor() {
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 20 }}>
                     <div
                       style={{
-                        background: "var(--g-ink)",
+                        background: moduleUnlocked ? "var(--g-ink)" : "#888",
                         color: "var(--g-paper)",
                         width: 38,
                         height: 38,
@@ -152,8 +173,17 @@ export function Tutor() {
                         <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: "var(--g-ink)" }}>
                           {mod.title}
                         </h2>
-                        <span style={{ fontSize: 11, background: "rgba(139,17,21,0.08)", color: "var(--g-red)", fontWeight: 700, padding: "2px 8px", borderRadius: 0 }}>
-                          Module {mod.number}
+                        <span
+                          style={{
+                            fontSize: 11,
+                            background: moduleUnlocked ? "rgba(139,17,21,0.08)" : "#eee",
+                            color: moduleUnlocked ? "var(--g-red)" : "#666",
+                            fontWeight: 700,
+                            padding: "2px 8px",
+                            borderRadius: 0,
+                          }}
+                        >
+                          {moduleUnlocked ? `Module ${mod.number} Unlocked` : `Module ${mod.number} Locked`}
                         </span>
                       </div>
                       <p style={{ fontSize: 13, color: "var(--g-muted)", margin: "4px 0 0", fontStyle: "italic" }}>
@@ -171,9 +201,8 @@ export function Tutor() {
                     }}
                   >
                     {displayLessons.map((lesson, idx) => {
-                      // Sequential index check in full lesson list
-                      const globalIdx = lessonList.findIndex((l) => l.id === lesson.id || l.title === lesson.title);
-                      const isUnlocked = globalIdx <= 0 || lessonList[globalIdx - 1]?.completed;
+                      // MODULE-BASED LOCKING: If module is unlocked, ALL lessons in this module are open!
+                      const isUnlocked = moduleUnlocked;
                       const isCompleted = lesson.completed;
                       const isActive = isUnlocked && !isCompleted;
 
@@ -201,7 +230,7 @@ export function Tutor() {
                               : "#ffffff",
                             padding: "16px 18px",
                             cursor: isUnlocked ? "pointer" : "not-allowed",
-                            opacity: !isUnlocked ? 0.75 : 1,
+                            opacity: !isUnlocked ? 0.65 : 1,
                             transition: "all 0.18s ease",
                             display: "flex",
                             flexDirection: "column",
@@ -229,7 +258,7 @@ export function Tutor() {
                                   color: isActive ? "var(--g-red)" : isCompleted ? "#16a34a" : "var(--g-muted)",
                                 }}
                               >
-                                Lesson {globalIdx >= 0 ? globalIdx + 1 : idx + 1}
+                                Lesson {idx + 1}
                               </span>
                               {isCompleted ? (
                                 <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, color: "#16a34a", fontWeight: 700 }}>
@@ -241,12 +270,12 @@ export function Tutor() {
                                 </span>
                               ) : (
                                 <span style={{ fontSize: 10, background: "var(--g-red)", color: "#fff", padding: "2px 6px", fontWeight: 700, borderRadius: 0 }}>
-                                  Active
+                                  Open
                                 </span>
                               )}
                             </div>
 
-                            {/* TITLE-ONLY CARD REQUIRED: Only rendering title */}
+                            {/* TITLE-ONLY CARD */}
                             <h3
                               style={{
                                 fontSize: 15,
@@ -280,7 +309,7 @@ export function Tutor() {
                               {isCompleted ? (
                                 "Review Lesson"
                               ) : !isUnlocked ? (
-                                "Complete prior lesson to unlock"
+                                `Finish Module ${Number(mod.number) - 1} to unlock`
                               ) : (
                                 <>
                                   Start Lesson <ArrowRight size={12} />

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "./_shared/router";
 import { Shell } from "./_shared";
 import { DEFAULT_MOCK_LESSONS } from "./Tutor";
-import { Send, Bot, User, Check, Sparkles, RotateCcw, PlayCircle, ArrowLeft, GraduationCap, Video } from "lucide-react";
+import { Send, Check, RotateCcw, PlayCircle, ArrowLeft } from "lucide-react";
 import "./_group.css";
 
 const DEFAULT_DEMO_LESSON = DEFAULT_MOCK_LESSONS[0];
@@ -223,7 +223,6 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
     return `Regarding your question (*"${userText}"*) in **${lessonTitle}**:\n\nReview the core definitions and key takeaways in this lesson. Feel free to ask if you'd like a step-by-step example!`;
   }
 
-  // Helper to format YouTube or direct video URL for embed
   const getEmbedVideoUrl = (url?: string) => {
     if (!url) return null;
     if (url.includes("youtube.com/watch?v=")) {
@@ -266,12 +265,12 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
     <Shell active="Guidr Tutor">
       <div className="content" style={{ maxWidth: 1150, margin: "0 auto" }}>
         
-        {/* GUIDR TUTOR BRANDING HEADER BAR - VISIBLE ON EVERY LESSON PAGE */}
+        {/* GUIDR TUTOR BRANDING HEADER BAR - NO ICON BEFORE MODULE */}
         <div
           style={{
             background: "var(--g-ink)",
             color: "#fff",
-            padding: "16px 24px",
+            padding: "18px 24px",
             marginBottom: 24,
             display: "flex",
             alignItems: "center",
@@ -280,28 +279,13 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
             boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div
-              style={{
-                width: 38,
-                height: 38,
-                background: "var(--g-red)",
-                display: "grid",
-                placeItems: "center",
-                color: "#fff",
-                fontWeight: 700,
-              }}
-            >
-              <GraduationCap size={22} />
+          <div>
+            <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#fca5a5", fontWeight: 700 }}>
+              Guidr Tutor Learning Path
             </div>
-            <div>
-              <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#fca5a5", fontWeight: 700 }}>
-                Guidr Tutor Learning Path
-              </div>
-              <h2 style={{ fontSize: 18, margin: "2px 0 0", color: "#fff", fontWeight: 700 }}>
-                Module: {lesson.module || "Know"} · {lesson.title}
-              </h2>
-            </div>
+            <h2 style={{ fontSize: 20, margin: "3px 0 0", color: "#fff", fontWeight: 700 }}>
+              Module: {lesson.module || "Know"} · {lesson.title}
+            </h2>
           </div>
 
           <Link
@@ -368,10 +352,9 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
               display: typeof window !== "undefined" && window.innerWidth < 768 && activeMobileTab !== "lesson" ? "none" : "block",
             }}
           >
-            {/* VIDEO SECTION ABOVE LESSON CONTENT REQUIREMENT */}
+            {/* VIDEO SECTION ABOVE LESSON CONTENT (NO ICON BEFORE VIDEO LESSON) */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                <Video size={18} color="var(--g-red)" />
+              <div style={{ marginBottom: 12 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "var(--g-ink)" }}>Video Lesson</h3>
               </div>
 
@@ -463,7 +446,7 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
             </div>
           </article>
 
-          {/* Guidr Tutor AI Chat Panel */}
+          {/* Guidr Tutor AI Chat Panel - NO ICON BEFORE GUIDR AI TUTOR, WHITE COLOR */}
           <aside
             style={{
               background: "var(--g-ink)",
@@ -479,10 +462,11 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 12, borderBottom: "1px solid #333", marginBottom: 14 }}>
               <div>
-                <div className="g-label" style={{ color: "var(--g-red)", display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}>
-                  <Sparkles size={14} /> Guidr AI Tutor
+                {/* GUIDR AI TUTOR IN WHITE WITH NO ICON */}
+                <div style={{ color: "#ffffff", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 700 }}>
+                  Guidr AI Tutor
                 </div>
-                <h3 style={{ fontSize: 15, margin: "3px 0 0", color: "#fff" }}>Ask anything about this lesson</h3>
+                <h3 style={{ fontSize: 14, margin: "4px 0 0", color: "#ccc", fontWeight: 500 }}>Ask anything about this lesson</h3>
               </div>
               <button
                 type="button"
@@ -505,7 +489,7 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
               </button>
             </div>
 
-            {/* Chat message list */}
+            {/* Chat message list - NO BOT/USER ICONS */}
             <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12, paddingRight: 4 }}>
               {chatMessages.length === 0 ? (
                 <div style={{ fontSize: 12, color: "#aaa", textAlign: "center", marginTop: 32, lineHeight: 1.6 }}>
@@ -528,8 +512,7 @@ ${lessonContent ? lessonContent.slice(0, 1500) : "Educational opportunities, pro
                       whiteSpace: "pre-wrap",
                     }}
                   >
-                    <div style={{ fontSize: 10, opacity: 0.75, marginBottom: 4, display: "flex", alignItems: "center", gap: 4, fontWeight: 600 }}>
-                      {msg.role === "student" ? <User size={10} /> : <Bot size={10} />}
+                    <div style={{ fontSize: 10, opacity: 0.75, marginBottom: 4, fontWeight: 600 }}>
                       {msg.role === "student" ? "You" : "Guidr Tutor"}
                     </div>
                     {msg.content}
