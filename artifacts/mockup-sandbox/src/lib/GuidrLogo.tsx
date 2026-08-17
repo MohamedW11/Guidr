@@ -3,7 +3,7 @@ type GuidrLogoProps = {
   className?: string;
 };
 
-export function GuidrLogo({ size = 24, className = "logo-mark" }: GuidrLogoProps) {
+export function GuidrLogo({ size = 38, className = "logo-mark" }: GuidrLogoProps) {
   return (
     <img
       src="/guidr-logo.png"

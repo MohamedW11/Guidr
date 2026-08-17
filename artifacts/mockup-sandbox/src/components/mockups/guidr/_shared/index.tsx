@@ -64,8 +64,7 @@ export const opportunities = [
 export function Brand({ dark = false }: { dark?: boolean }) {
   return (
     <div className="brand" style={{ color: dark ? "var(--g-paper)" : undefined }}>
-      <GuidrLogo />
-      <span>guidr</span>
+      <GuidrLogo size={40} />
     </div>
   );
 }

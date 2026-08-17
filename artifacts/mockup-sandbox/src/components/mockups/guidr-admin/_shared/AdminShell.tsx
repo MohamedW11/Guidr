@@ -8,8 +8,7 @@ import "../_group.css";
 export function AdminBrand() {
   return (
     <div className="ga-brand">
-      <GuidrLogo />
-      <span>guidr</span>
+      <GuidrLogo size={40} />
     </div>
   );
 }
