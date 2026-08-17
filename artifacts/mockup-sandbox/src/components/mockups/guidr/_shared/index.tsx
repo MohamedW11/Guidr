@@ -193,44 +193,153 @@ export function Shell({ active, children }: { active: string; children: React.Re
   );
 }
 
+function getInitials(item: any): string {
+  const name = item.org || item.organization || item.title || item.name || "OP";
+  const words = name.trim().split(/\s+/).filter((w: string) => !["and", "the", "for", "of", "&"].includes(w.toLowerCase()));
+  if (words.length >= 2) {
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
 export function OpportunityCard({ item, onOpen, saved, onSave }: { item: any; onOpen?: () => void; saved?: boolean; onSave?: () => void }) {
-  const imageUrl = getOpportunityImage(item);
+  const initials = getInitials(item);
+  const categoryTag = (item.tag || item.categories?.[0] || "Opportunity").toUpperCase();
+
   return (
-    <article className="card">
-      <div
-        className="card-top"
-        onClick={onOpen}
-        style={{
-          cursor: onOpen ? "pointer" : "default",
-          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%), url(${imageUrl})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <span className="tag">{item.tag || item.categories?.[0] || "Opportunity"}</span>
-        <button
-          className="bookmark"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSave?.();
+    <article
+      className="card"
+      style={{
+        borderRadius: 0,
+        border: "1px solid var(--g-line)",
+        background: "#ffffff",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+      }}
+    >
+      <div style={{ padding: "16px 16px 14px", flex: 1, display: "flex", flexDirection: "column" }}>
+        {/* Header Row: Initials Avatar Box, # CURATED badge, Bookmark */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                background: "#f3f3f3",
+                border: "1px solid var(--g-line)",
+                borderRadius: 0,
+                display: "grid",
+                placeItems: "center",
+                fontWeight: 700,
+                fontSize: 12,
+                color: "var(--g-ink)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {initials}
+            </div>
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                background: "#f3f3f3",
+                border: "1px solid var(--g-line)",
+                color: "var(--g-muted)",
+                padding: "3px 7px",
+                borderRadius: 0,
+              }}
+            >
+              # Curated
+            </span>
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSave?.();
+            }}
+            aria-label="Save opportunity"
+            style={{
+              background: "none",
+              border: 0,
+              cursor: "pointer",
+              padding: 4,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: saved ? "var(--g-red)" : "var(--g-muted)",
+            }}
+          >
+            <Bookmark size={16} fill={saved ? "var(--g-red)" : "none"} color={saved ? "var(--g-red)" : "var(--g-muted)"} />
+          </button>
+        </div>
+
+        {/* Category Label in Uppercase Red */}
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            color: "var(--g-red)",
+            textTransform: "uppercase",
+            marginBottom: 6,
           }}
-          aria-label="save"
         >
-          <Bookmark size={14} fill={saved ? "var(--g-red)" : "none"} color={saved ? "var(--g-red)" : "var(--g-ink)"} />
-        </button>
-        <div className="card-top-mode">{item.mode || item.locationType || "Active"}</div>
-      </div>
-      <div className="card-body">
-        <div style={{ fontSize: 10, color: "var(--g-muted)" }}>{item.org || item.organization}</div>
-        <h3 onClick={onOpen} style={{ cursor: onOpen ? "pointer" : "default" }}>
+          {categoryTag}
+        </div>
+
+        {/* Title */}
+        <h3
+          onClick={onOpen}
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            margin: "0 0 4px",
+            lineHeight: 1.3,
+            cursor: onOpen ? "pointer" : "default",
+            color: "var(--g-ink)",
+          }}
+        >
           {item.title || item.name}
         </h3>
-        <p>{item.desc || item.description}</p>
-        <div className="meta">{item.date || item.deadlineDate || "Active"}</div>
-        <div style={{ display: "flex", gap: 8, marginTop: 12, alignItems: "center" }}>
-          <button className="g-btn small" onClick={onOpen}>
+
+        {/* Provider / Organization */}
+        <div style={{ fontSize: 11, color: "var(--g-muted)", marginBottom: 10, fontWeight: 500 }}>
+          {item.org || item.organization}
+        </div>
+
+        {/* Description */}
+        <p
+          style={{
+            fontSize: 12,
+            lineHeight: 1.5,
+            color: "#444444",
+            margin: "0 0 16px",
+            flex: 1,
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {item.desc || item.description}
+        </p>
+
+        {/* Footer Meta & Actions */}
+        <div style={{ borderTop: "1px solid var(--g-line)", paddingTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <button
+            type="button"
+            className="g-btn small"
+            onClick={onOpen}
+            style={{ borderRadius: 0, padding: "7px 12px" }}
+          >
             View details <ArrowRight size={12} style={{ verticalAlign: "middle" }} />
           </button>
+
           {item.applicationLink && (
             <a
               href={item.applicationLink}
@@ -238,7 +347,7 @@ export function OpportunityCard({ item, onOpen, saved, onSave }: { item: any; on
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
               style={{
-                color: "#bd3b3f",
+                color: "var(--g-red)",
                 fontSize: 11,
                 fontWeight: 600,
                 textDecoration: "none",

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "./_shared/router";
 import { Shell, OpportunityCard } from "./_shared";
 import { MVP_CATEGORIES, EGYPTIAN_GOVERNORATES, STUDENT_INTERESTS } from "../../../lib/governorates";
-import { Bookmark, MapPin, Calendar, ExternalLink, ArrowUpDown } from "lucide-react";
+import { Bookmark, MapPin, Calendar, ExternalLink, ArrowUpDown, Search, ChevronDown } from "lucide-react";
 import "./_group.css";
 
 function getDeadlineTimestamp(item: any): number {
@@ -126,17 +126,87 @@ export function Opportunities() {
   return (
     <Shell active="Opportunities">
       <div className="content">
-        <div style={{ background: "var(--g-ink)", color: "white", padding: "28px 24px", margin: "0 0 24px", borderRadius: 8 }}>
-          <div className="g-label" style={{ color: "white" }}>Explore with intention</div>
-          <h1 style={{ fontSize: "clamp(24px, 5vw, 36px)", margin: "8px 0 16px" }}>
-            Find your next yes<span style={{ color: "#bd3b3f" }}>.</span>
+        <div
+          style={{
+            background: "var(--g-ink)",
+            color: "#ffffff",
+            padding: "32px 36px 36px",
+            margin: "0 0 28px",
+            borderRadius: 0,
+          }}
+        >
+          {/* Top meta row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                color: "var(--g-red)",
+                textTransform: "uppercase",
+              }}
+            >
+              FIND WHAT COMES NEXT
+            </div>
+
+            <div
+              style={{
+                fontSize: 11,
+                color: "#cccccc",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                padding: "5px 12px",
+                borderRadius: 0,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                cursor: "pointer",
+              }}
+            >
+              <span style={{ color: "var(--g-red)", fontSize: 8 }}>●</span> Mohamed's school library <ChevronDown size={12} />
+            </div>
+          </div>
+
+          {/* Heading */}
+          <h1 style={{ fontSize: "clamp(32px, 5vw, 44px)", margin: "0 0 10px", fontWeight: 500, letterSpacing: "-0.03em" }}>
+            Opportunities<span style={{ color: "var(--g-red)" }}>.</span>
           </h1>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by keyword, title, or organization..."
-            style={{ width: "min(480px,100%)", padding: 12, background: "#fff", border: 0, borderRadius: 4, color: "#111", minHeight: 44 }}
-          />
+
+          {/* Subtitle */}
+          <p style={{ fontSize: 13, color: "#aaaaaa", margin: "0 0 24px", maxWidth: 640, lineHeight: 1.5 }}>
+            A considered collection of competitions, programmes, and scholarships for ambitious students in Egypt.
+          </p>
+
+          {/* Embedded Search input inside black header */}
+          <div style={{ position: "relative", width: "min(640px, 100%)" }}>
+            <Search
+              size={16}
+              style={{
+                position: "absolute",
+                left: 14,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#888888",
+                pointerEvents: "none",
+              }}
+            />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by opportunity, subject, or destination..."
+              style={{
+                width: "100%",
+                padding: "12px 14px 12px 40px",
+                background: "#181818",
+                border: "1px solid #333333",
+                borderRadius: 0,
+                color: "#ffffff",
+                fontSize: 13,
+                outline: "none",
+                minHeight: 44,
+              }}
+            />
+          </div>
         </div>
 
         {/* Results bar above grid with mobile filter toggle */}
