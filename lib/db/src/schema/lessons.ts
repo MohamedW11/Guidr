@@ -9,6 +9,7 @@ export const lessonsTable = pgTable("lessons", {
   title: varchar("title", { length: 255 }).notNull(),
   module: varchar("module", { length: 255 }).notNull(),
   content: text("content"),
+  videoUrl: text("video_url"),
   status: lessonStatusEnum("status").notNull().default("draft"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),

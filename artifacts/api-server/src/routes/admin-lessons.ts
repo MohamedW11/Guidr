@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
 // Create lesson
 router.post("/", async (req, res) => {
   try {
-    const { title, module, content, status, sortOrder } = req.body;
+    const { title, module, content, videoUrl, status, sortOrder } = req.body;
 
     const [created] = await db
       .insert(lessonsTable)
@@ -30,6 +30,7 @@ router.post("/", async (req, res) => {
         title,
         module,
         content: content || "",
+        videoUrl: videoUrl || null,
         status: status || "draft",
         sortOrder: sortOrder ? Number(sortOrder) : 1,
       })
@@ -51,7 +52,7 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, module, content, status, sortOrder } = req.body;
+    const { title, module, content, videoUrl, status, sortOrder } = req.body;
 
     const [updated] = await db
       .update(lessonsTable)
@@ -59,6 +60,7 @@ router.put("/:id", async (req, res) => {
         title,
         module,
         content: content || "",
+        videoUrl: videoUrl !== undefined ? videoUrl : undefined,
         status: status || "draft",
         sortOrder: sortOrder ? Number(sortOrder) : undefined,
         updatedAt: new Date(),

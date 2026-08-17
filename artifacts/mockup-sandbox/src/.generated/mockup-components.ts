@@ -19,5 +19,10 @@ export const modules: ModuleMap = {
   "./components/mockups/guidr-admin/Lessons.tsx": () => import("../components/mockups/guidr-admin/Lessons.tsx"),
   "./components/mockups/guidr-admin/Login.tsx": () => import("../components/mockups/guidr-admin/Login.tsx"),
   "./components/mockups/guidr-admin/Opportunities.tsx": () => import("../components/mockups/guidr-admin/Opportunities.tsx"),
-  "./components/mockups/guidr-admin/Settings.tsx": () => import("../components/mockups/guidr-admin/Settings.tsx")
+  "./components/mockups/guidr-admin/Settings.tsx": () => import("../components/mockups/guidr-admin/Settings.tsx"),
+  "./components/mockups/guidr/interest-discovery/DiscoveryIntro.tsx": () => import("../components/mockups/guidr/interest-discovery/DiscoveryIntro.tsx"),
+  "./components/mockups/guidr/interest-discovery/DiscoveryQuestion.tsx": () => import("../components/mockups/guidr/interest-discovery/DiscoveryQuestion.tsx"),
+  "./components/mockups/guidr/interest-discovery/DiscoveryResults.tsx": () => import("../components/mockups/guidr/interest-discovery/DiscoveryResults.tsx"),
+  "./components/mockups/guidr/interest-discovery/LikertScale.tsx": () => import("../components/mockups/guidr/interest-discovery/LikertScale.tsx"),
+  "./components/mockups/guidr/interest-discovery/NudgeModal.tsx": () => import("../components/mockups/guidr/interest-discovery/NudgeModal.tsx")
 };

@@ -1037,6 +1037,9 @@ components:
           type: string
         content:
           type: string
+        videoUrl:
+          type: string
+          nullable: true
         status:
           type: string
           enum: [draft, published, locked]
@@ -1061,6 +1064,9 @@ components:
           type: string
         content:
           type: string
+        videoUrl:
+          type: string
+          nullable: true
         status:
           type: string
           enum: [draft, published, locked]
@@ -1085,6 +1091,9 @@ components:
           type: string
         content:
           type: string
+        videoUrl:
+          type: string
+          nullable: true
         status:
           type: string
           enum: [draft, published, locked]

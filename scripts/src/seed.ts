@@ -942,78 +942,366 @@ async function seed() {
   await db.insert(opportunitiesTable).values(formattedOpportunities as any);
   console.log(`✅ ${formattedOpportunities.length} Real opportunities seeded successfully.`);
 
-  // 4. Seed Initial 3 Requested Lessons for Guidr Tutor
-  await db.insert(lessonsTable).values([
+  // 4. Seed Guidr Tutor Modules & Lessons
+  console.log("🧹 Clearing old lessons...");
+  await db.delete(lessonsTable);
+
+  const MODULE_LESSONS = [
+    // Module 1: Know
     {
-      title: "What Are Extracurricular Activities?",
-      module: "General",
-      description: "Understand how clubs, competitions, volunteering, and projects shape your personal growth and college readiness.",
-      content: `Extracurricular activities are any pursuits you engage in outside of standard academic coursework. They allow you to explore personal interests, develop practical skills, and demonstrate commitment to future goals.
-
-### 1. Why Are Extracurriculars Important?
-- **Skill Development**: Build teamwork, leadership, problem-solving, and communication abilities.
-- **Interest Exploration**: Test different fields (such as robotics, public speaking, software, or community service) before choosing a university major.
-- **Distinction**: Show university admissions and scholarship committees what makes you unique beyond grades and test scores.
-
-### 2. Key Types of Extracurricular Activities
-- **Competitions & Fairs**: ISEF Science Fairs, NASA Space Apps, Hackathons, and Olympiads.
-- **Student Organizations & Clubs**: Model United Nations (MUN Cairo), Student Unions, and Debate Societies.
-- **Community Service & Volunteering**: Environmental initiatives, tutoring younger students, and local non-profit work.
-- **Personal Projects**: Building an app, writing research papers, running a blog, or founding an initiative.
-
-### 3. Quality vs. Quantity
-Admissions officers prefer **deep engagement in 2–3 meaningful activities** where you showed initiative and impact, rather than superficial participation in a dozen clubs.`,
-      status: "published",
+      title: "Welcome to Guidr",
+      module: "Know",
       sortOrder: 1,
+      status: "published",
+      content: `Welcome to Guidr Tutor! Guidr is your personal companion for navigating educational opportunities across Egypt and beyond.
+
+### What is Guidr?
+Guidr empowers high school students to discover summer programs, scholarships, exchange opportunities, competitions, and volunteering paths tailored to their personal goals.
+
+### How to Get Started
+- Explore curated opportunities on the Opportunities page.
+- Track deadlines and bookmark your favorite choices.
+- Learn step-by-step through Guidr Tutor lessons.`,
     },
     {
-      title: "What Is a Scholarship?",
-      module: "General",
-      description: "Learn about merit-based, need-based, and fully funded scholarships available for Egyptian students.",
-      content: `A scholarship is financial aid awarded to students to assist with educational expenses, ranging from full tuition and living stipends to partial program grants.
-
-### 1. Types of Scholarships
-- **Merit-Based Scholarships**: Awarded for academic excellence, scientific research, leadership, or athletic achievement (e.g., AUC Merit Scholarship).
-- **Need-Based Financial Aid**: Awarded based on a student’s demonstrated financial need to ensure education is accessible.
-- **Fully Funded Grants**: Covers tuition, housing, airfare, monthly living stipends, and health insurance (e.g., USAID STEM Scholarship, MEPI Tomorrow's Leaders, Global UGRAD).
-
-### 2. Essential Application Components
-- **Official Academic Transcripts**: High school grade records.
-- **Personal Statement & Essays**: Narratives highlighting your goals, achievements, and resilience.
-- **Letters of Recommendation**: Written by teachers or mentors who know your character and work ethic.
-- **Standardized Tests & English Proficiency**: TOEFL/IELTS or SAT scores where required.
-
-### 3. Tips for Scholarship Success
-1. **Start Early**: Research deadlines 6–12 months in advance.
-2. **Tailor Your Essays**: Answer the specific prompt directly without generic templates.
-3. **Proofread Carefully**: Ensure zero spelling or grammatical mistakes.`,
-      status: "published",
+      title: "What are educational opportunities?",
+      module: "Know",
       sortOrder: 2,
+      status: "published",
+      content: `Educational opportunities encompass any out-of-classroom experiences that accelerate your academic, personal, and professional development.
+
+### Key Characteristics
+- **Growth-Focused**: Designed to help you build real-world skills.
+- **Accessible**: Ranging from local community events to fully funded international exchanges.
+- **Diverse**: Covering STEM, humanities, arts, leadership, and public speaking.`,
     },
     {
-      title: "How to Use Guidr",
-      module: "General",
-      description: "Discover how to explore opportunities, track deadlines, complete lessons, and chat with your AI Tutor.",
-      content: `Guidr is your personal compass for navigating educational opportunities, scholarships, and academic growth across Egypt.
-
-### 1. Exploring & Filtering Opportunities
-- Navigate to the **Opportunities** page to browse curated competitions, scholarships, summer programs, and workshops.
-- Use the **Checkboxes Filter Sidebar** to filter by Category, Interests, and Mode (In-Person vs. Online).
-- Sort by **Closing Soon (Deadline)** to never miss an important application cutoff!
-
-### 2. Saving & Tracking Deadlines
-- Click the **Bookmark icon** on any opportunity card to save it to your personal dashboard.
-- Saved opportunities appear right at the top of your **Dashboard** and **Saved** tab for quick access.
-
-### 3. Learning with Guidr Tutor & AI Study Buddy
-- Go to **Guidr Tutor** to follow structured learning paths designed for Egyptian high school students.
-- Complete lessons sequentially—finishing one automatically unlocks the next step!
-- Use the **Guidr AI Tutor** sidebar inside any lesson to ask questions, clarify confusing concepts, or start a **New Chat** anytime.`,
-      status: "published",
+      title: "Why are they important?",
+      module: "Know",
       sortOrder: 3,
+      status: "published",
+      content: `Engaging in educational opportunities transforms your student journey.
+
+### 1. Distinction Beyond Grades
+Top universities and scholarship committees look beyond GPA. They want to see curiosity, initiative, and impact.
+
+### 2. Practical Skill Building
+Develop critical thinking, teamwork, problem-solving, and communication in real-world environments.
+
+### 3. Expanding Your Network
+Connect with like-minded peers, professors, industry mentors, and alumni across the globe.`,
     },
-  ] as any).onConflictDoNothing();
-  console.log("✅ 3 Requested Guidr Tutor lessons seeded.");
+    {
+      title: "What are the different types of opportunities, and why is each one important?",
+      module: "Know",
+      sortOrder: 4,
+      status: "published",
+      content: `Discover the major categories of educational opportunities available to Egyptian high school students:
+
+### 1. Summer Programs
+Intensive academic or research programs (e.g. YYGS, RSI, TechGirls) that give you a taste of university-level study.
+
+### 2. Competitions
+National and international contests (e.g. ISEF, EOI, Conrad Challenge) to test your skills and gain global recognition.
+
+### 3. Volunteering
+Community service initiatives (e.g. Red Crescent, Resala) that develop empathy, leadership, and civic responsibility.
+
+### 4. Exchange Programs
+Cultural and academic exchanges (e.g. YES Program, AFS) to immerse yourself in new global cultures.
+
+### 5. Events
+Workshops, hackathons, and conferences (e.g. NASA Space Apps, Youth Climate Summits) for intensive networking and learning.
+
+### 6. Clubs & Communities
+Student organizations (e.g. MUN, IEEE Youth, GDSC) providing ongoing peer collaboration and leadership roles.
+
+### 7. Scholarships
+Merit and need-based financial aid awards (e.g. USAID STEM, Sawiris Foundation, UWC) opening doors to premier universities.`,
+    },
+    {
+      title: "Which opportunities are right for you?",
+      module: "Know",
+      sortOrder: 5,
+      status: "published",
+      content: `Selecting the right opportunities depends on your personal interests, grade level, and long-term aspirations.
+
+### 1. Assess Your Passion
+Choose activities that align with your natural curiosities rather than trying to check boxes.
+
+2. Match Your Readiness & Grade
+Start with local clubs or introductory competitions in grades 9-10, progressing to national research fairs or international scholarships in grades 11-12.
+
+3. Quality Over Quantity
+Focus deeply on 2-3 meaningful commitments where you can take initiative and demonstrate tangible leadership.`,
+    },
+
+    // Module 2: Prepare
+    {
+      title: "What is a good student profile?",
+      module: "Prepare",
+      sortOrder: 6,
+      status: "published",
+      content: `A strong student profile is a cohesive narrative showing who you are, what drives you, and how you create impact.
+
+### Key Components of a Strong Profile
+- **Academic Foundation**: Consistent commitment in school work and curiosity beyond standard curricula.
+- **Focused Extracurricular Narrative**: Clear engagement in a specific spike or combination of interests.
+- **Leadership & Initiative**: Starting projects, leading team efforts, or creating solutions for your community.
+- **Reflective Self-Awareness**: Ability to articulate your growth and lessons learned through essays and interviews.`,
+    },
+    {
+      title: "How to discover your interests and strengths",
+      module: "Prepare",
+      sortOrder: 7,
+      status: "published",
+      content: `Self-discovery is an active process of experimentation and reflection.
+
+### 1. Take the Guidr Interest Assessment
+Use our interactive Interest Discovery tool to highlight top skill domains across STEM, humanities, and entrepreneurship.
+
+### 2. Try Micro-Experiences
+Attend 1-day workshops, join school clubs, or build short personal projects to test what excites you.
+
+### 3. Reflect on Energetic Engagement
+Notice which activities feel energizing rather than draining. Your natural flow is a major clue to your core strengths.`,
+    },
+    {
+      title: "How to find the right opportunities",
+      module: "Prepare",
+      sortOrder: 8,
+      status: "published",
+      content: `Finding relevant opportunities requires effective filtering and strategic search.
+
+### 1. Leverage Guidr Filters
+Filter opportunities by Category, Mode (Online vs. In-Person), Eligible Grade, and Governorate on Guidr.
+
+### 2. Follow Trusted Platforms
+Subscribe to educational newsletters, university outreach pages, and student communities.
+
+### 3. Keep a Pipeline
+Save opportunities to your Guidr Dashboard early so you can plan application timelines months in advance.`,
+    },
+    {
+      title: "How to read and understand an opportunity",
+      module: "Prepare",
+      sortOrder: 9,
+      status: "published",
+      content: `Deconstruct every opportunity announcement into 5 critical pillars:
+
+### 1. Eligibility
+Check grade bounds, age limits, nationality, and governorate constraints first to avoid wasted effort.
+
+### 2. Requirements
+Note required transcripts, recommendation letters, English test scores (TOEFL/IELTS), or project portfolios.
+
+### 3. Deadline & Time Zone
+Record exact cut-off dates and time zones (e.g. 23:59 Cairo local time).
+
+### 4. Funding & Financial Support
+Identify whether the program is fully funded, offers need-based financial aid, or requires application fees.
+
+### 5. Selection Process
+Understand whether the selection involves written essay rounds, technical tasks, or live interviews.`,
+    },
+    {
+      title: "How to build a strong application",
+      module: "Prepare",
+      sortOrder: 10,
+      status: "published",
+      content: `Crafting a compelling application requires clarity, authenticity, and attention to detail.
+
+### 1. Tell Your Story
+Structure your responses to show your journey, challenges overcome, and future ambition.
+
+### 2. Quantify Your Achievements
+Instead of saying "helped clean a local park", write "organized a 15-student initiative that collected 100kg of recyclable waste".
+
+### 3. Review & Proofread
+Have a mentor, teacher, or trusted senior review your materials for grammar and tone before submission.`,
+    },
+    {
+      title: "How to write strong essays",
+      module: "Prepare",
+      sortOrder: 11,
+      status: "published",
+      content: `Essays are your voice in the application process.
+
+### 1. Answer the Prompt Directly
+Ensure every paragraph directly addresses what the selection committee is asking.
+
+### 2. Show, Don't Just Tell
+Use specific anecdotes and concrete examples to demonstrate leadership and problem-solving.
+
+### 3. Hook the Reader Early
+Start with a memorable opening sentence that captures attention immediately.`,
+    },
+    {
+      title: "How to prepare for interviews",
+      module: "Prepare",
+      sortOrder: 12,
+      status: "published",
+      content: `Interviews are conversations to evaluate your enthusiasm, communication skills, and fit.
+
+### 1. Know Your Application Inside Out
+Be ready to elaborate on any experience, essay detail, or project mentioned in your submitted application.
+
+### 2. Practice STAR Technique
+Structure answers to situational questions using **Situation, Task, Action, Result**.
+
+### 3. Prepare Questions for the Interviewer
+Show genuine interest by asking thoughtful questions about the program structure or community culture.`,
+    },
+    {
+      title: "How to use Guidr effectively",
+      module: "Prepare",
+      sortOrder: 13,
+      status: "published",
+      content: `Maximize Guidr to streamline your prep workflow.
+
+### 1. Save Active Opportunities
+Click the bookmark icon on opportunity cards to save them to your personal Dashboard.
+
+### 2. Leverage Guidr AI Tutor
+Inside any lesson page, ask Guidr Tutor AI questions to clarify application strategies, essay ideas, or program details.
+
+### 3. Track Lesson Completion
+Complete lessons sequentially to build confidence step by step.`,
+    },
+    {
+      title: "How to get accepted into summer programs",
+      module: "Prepare",
+      sortOrder: 14,
+      status: "published",
+      content: `Summer programs seek intellectual curiosity and academic readiness.
+
+### Key Acceptance Factors
+- **Demonstrated Passion**: Show previous self-study or related projects in the program's field.
+- **Strong Recommendations**: Request letters from teachers who know your work ethic and character.
+- **Early Preparation**: Begin drafting essays 2-3 months prior to international deadlines.`,
+    },
+    {
+      title: "How to win competitions",
+      module: "Prepare",
+      sortOrder: 15,
+      status: "published",
+      content: `Winning competitive contests requires methodology and persistence.
+
+### 1. Study Past Winning Entries
+Analyze previous winning projects or rubrics in ISEF, Olympiads, or hackathons to understand high standards.
+
+### 2. Seek Mentor Guidance
+Connect with university advisors or former winners for technical review.
+
+### 3. Focus on Clear Presentation
+Present your solution or research clearly with convincing visuals, data charts, and confident speaking.`,
+    },
+    {
+      title: "How to get scholarships",
+      module: "Prepare",
+      sortOrder: 16,
+      status: "published",
+      content: `Scholarships support students who demonstrate high potential and financial need or merit.
+
+### Winning Strategies
+- **Fulfill All Criteria**: Ensure every document (financial records, transcripts) is accurate and submitted early.
+- **Highlight Community Impact**: Show how you will give back to your community and nation.
+- **Apply to Multiple Options**: Spread your opportunities across national and international funding bodies.`,
+    },
+
+    // Module 3: Act
+    {
+      title: "Opportunities After High School",
+      module: "Act",
+      sortOrder: 17,
+      status: "published",
+      content: `Planning your post-high-school transition sets up long-term success.
+
+### Key Pathways
+- **University Undergraduate Degrees**: Public, private, and international universities in Egypt and overseas.
+- **Gap Year Initiatives**: Structured research, fellowship, or service years.
+- **Professional Bootcamps**: Specialized technical training in software, data, or design.`,
+    },
+    {
+      title: "How to choose what to apply for",
+      module: "Act",
+      sortOrder: 18,
+      status: "published",
+      content: `Avoid application burnout by making deliberate choices.
+
+### 1. Tier Your List
+Divide your list into **Reach**, **Target**, and **Safety** opportunities based on selectivity.
+
+### 2. Consider Capacity
+Focus on 3-5 high-quality applications at a time rather than rushing through 20 weak submissions.
+
+### 3. Check Alignment
+Confirm that every chosen program advances your specific goals.`,
+    },
+    {
+      title: "How to plan",
+      module: "Act",
+      sortOrder: 19,
+      status: "published",
+      content: `Turn goals into actionable timelines with a clear schedule.
+
+### Application Roadmap
+- **3 Months Out**: Identify programs, request recommendation letters, outline essays.
+- **1 Month Out**: Write first essay drafts, gather transcripts.
+- **2 Weeks Out**: Finalize essays, proofread all fields.
+- **1 Week Out**: Submit early to avoid last-minute portal crashes!`,
+    },
+    {
+      title: "How to track your applications",
+      module: "Act",
+      sortOrder: 20,
+      status: "published",
+      content: `Keep control of deadlines and status updates.
+
+### Organization Best Practices
+- Use your Guidr Saved dashboard to track active deadlines.
+- Maintain a personal tracker spreadsheet with submission dates, portal logins, and result notification dates.`,
+    },
+    {
+      title: "What to do after applying",
+      module: "Act",
+      sortOrder: 21,
+      status: "published",
+      content: `Stay proactive while waiting for admissions decisions.
+
+### Proactive Next Steps
+- Confirm submission receipt emails.
+- Send optional polite updates if you achieve a major new award or project milestone.
+- Shift focus to upcoming academic goals and next application deadlines.`,
+    },
+    {
+      title: "What if you get rejected?",
+      module: "Act",
+      sortOrder: 22,
+      status: "published",
+      content: `Rejection is a natural step in every ambitious journey.
+
+### Growth Mindset Actions
+- **Don't Take it Personally**: Highly competitive programs reject many qualified applicants due to space limits.
+- **Request Feedback**: Where possible, ask for constructive advice.
+- **Refine & Re-Apply**: Use the application materials you built to apply for other opportunities.`,
+    },
+    {
+      title: "What if you get accepted?",
+      module: "Act",
+      sortOrder: 23,
+      status: "published",
+      content: `Congratulations on your acceptance!
+
+### Post-Acceptance Checklist
+- Carefully read offer terms, deposit/acceptance deadlines, and financial aid award letters.
+- Formally accept your offer before the cutoff date.
+- Send thank-you notes to teachers and mentors who wrote recommendation letters for you!`,
+    },
+  ];
+
+  await db.insert(lessonsTable).values(MODULE_LESSONS as any).onConflictDoNothing();
+  console.log(`✅ ${MODULE_LESSONS.length} Lessons across 3 modules (Know, Prepare, Act) seeded successfully.`);
 
   console.log("🎉 Seeding completed successfully!");
 }

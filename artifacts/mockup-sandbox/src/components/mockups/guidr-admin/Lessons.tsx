@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, GripVertical, PenLine, ChevronUp, ChevronDown, X, Trash2, FileText, Link as LinkIcon, Upload, Check, Sparkles } from "lucide-react";
+import { Plus, GripVertical, PenLine, ChevronUp, ChevronDown, X, Trash2, FileText, Link as LinkIcon, Upload, Check, Sparkles, Video, Play, Film } from "lucide-react";
 import { AdminShell, AdminTop } from "./_shared/AdminShell";
 import "./_group.css";
 
@@ -8,6 +8,7 @@ export function Lessons() {
   const [isLoading, setIsLoading] = useState(true);
   const [editing, setEditing] = useState<any | null | false>(false);
   const [toast, setToast] = useState("");
+  const [selectedModuleFilter, setSelectedModuleFilter] = useState<string>("all");
 
   const fetchAdminLessons = async () => {
     setIsLoading(true);
@@ -95,13 +96,17 @@ export function Lessons() {
     }
   };
 
+  const filteredItems = selectedModuleFilter === "all"
+    ? items
+    : items.filter((i) => (i.module || "Know").toLowerCase() === selectedModuleFilter.toLowerCase());
+
   return (
     <AdminShell active="Guidr Tutor">
       <div className="ga-content">
         <AdminTop
           eyebrow="Curriculum / Guidr Tutor"
-          title="Learning path"
-          description="Shape the sequence of lessons and content that helps Egyptian students move from self-knowledge to a confident next step."
+          title="Learning Path & Video Management"
+          description="Manage curriculum modules (Know, Prepare, Act), assign video lessons, and edit AI Tutor study material."
           action={
             <button className="ga-btn red" onClick={() => setEditing(null)}>
               <Plus size={15} /> Add lesson
@@ -109,23 +114,46 @@ export function Lessons() {
           }
         />
 
-        <div className="ga-summary" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div className="ga-summary" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
           <div className="ga-stat">
             <strong>{items.length}</strong>
             <span>Total lessons</span>
           </div>
           <div className="ga-stat">
-            <strong>{items.filter((i) => i.status === "published").length}</strong>
-            <span>Published for students</span>
+            <strong>{items.filter((i) => (i.module || "").toLowerCase() === "know").length}</strong>
+            <span>Module 1 (Know)</span>
           </div>
           <div className="ga-stat">
-            <strong>{items.filter((i) => i.status === "draft").length}</strong>
-            <span>Draft / In Progress</span>
+            <strong>{items.filter((i) => (i.module || "").toLowerCase() === "prepare").length}</strong>
+            <span>Module 2 (Prepare)</span>
+          </div>
+          <div className="ga-stat">
+            <strong>{items.filter((i) => (i.module || "").toLowerCase() === "act").length}</strong>
+            <span>Module 3 (Act)</span>
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid var(--ga-line)", paddingTop: 14, marginBottom: 12, fontSize: 11, color: "var(--ga-muted)" }}>
-          Drag or move lessons to order the learning path · Lesson content is indexed directly for the Guidr Tutor AI
+        {/* Module Filter Tabs */}
+        <div style={{ display: "flex", gap: 8, margin: "20px 0 14px", borderBottom: "1px solid var(--ga-line)", paddingBottom: 10 }}>
+          {["all", "Know", "Prepare", "Act"].map((modKey) => (
+            <button
+              key={modKey}
+              type="button"
+              onClick={() => setSelectedModuleFilter(modKey)}
+              style={{
+                background: selectedModuleFilter === modKey ? "var(--ga-red, #bd3b3f)" : "#1a1a1a",
+                border: "1px solid #333",
+                color: "#fff",
+                padding: "6px 14px",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                borderRadius: 4,
+              }}
+            >
+              {modKey === "all" ? "All Modules" : `Module: ${modKey}`}
+            </button>
+          ))}
         </div>
 
         <div className="ga-table">
@@ -136,13 +164,15 @@ export function Lessons() {
               <thead>
                 <tr>
                   <th style={{ width: 46 }}>Order</th>
-                  <th>Lesson & Description</th>
+                  <th>Lesson Title</th>
+                  <th>Module</th>
+                  <th>Video Status</th>
                   <th>Status</th>
                   <th />
                 </tr>
               </thead>
               <tbody>
-                {items.map((i, index) => (
+                {filteredItems.map((i, index) => (
                   <tr key={i.id}>
                     <td>
                       <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -152,9 +182,22 @@ export function Lessons() {
                     </td>
                     <td>
                       <div className="ga-title" style={{ fontSize: 13, fontWeight: 700 }}>{i.title}</div>
-                      <div className="ga-sub" style={{ fontSize: 11, color: "var(--ga-muted)", marginTop: 2 }}>
-                        {i.description || "Master core academic and research skills for STEM success."}
-                      </div>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: 11, background: "#262626", color: "#fff", padding: "3px 8px", borderRadius: 4, fontWeight: 600 }}>
+                        {i.module || "Know"}
+                      </span>
+                    </td>
+                    <td>
+                      {i.videoUrl ? (
+                        <span style={{ fontSize: 11, color: "#4ade80", display: "inline-flex", alignItems: "center", gap: 4, fontWeight: 600 }}>
+                          <Video size={13} /> Video Assigned
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: 11, color: "#888", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                          <Film size={13} /> No Video
+                        </span>
+                      )}
                     </td>
                     <td>
                       <button
@@ -242,8 +285,9 @@ function LessonDrawer({
   const [form, setForm] = useState<any>(
     initial || {
       title: "",
-      description: "",
+      module: "Know",
       content: "",
+      videoUrl: "",
       status: "published",
       sortOrder: 1,
     },
@@ -253,7 +297,9 @@ function LessonDrawer({
   const [gdocUrl, setGdocUrl] = useState("");
   const [isFetchingGdoc, setIsFetchingGdoc] = useState(false);
   const [gdocMsg, setGdocMsg] = useState("");
+  const [videoInputMode, setVideoInputMode] = useState<"url" | "file">("url");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFetchGdoc = async () => {
     if (!gdocUrl.trim()) return;
@@ -308,13 +354,28 @@ function LessonDrawer({
     e.target.value = "";
   };
 
+  // Video Upload Handler
+  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setForm((prev: any) => ({ ...prev, videoUrl: reader.result }));
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   return (
     <div className="ga-modal-backdrop">
-      <aside className="ga-drawer" style={{ width: "min(620px, 92vw)", overflowY: "auto" }}>
+      <aside className="ga-drawer" style={{ width: "min(640px, 94vw)", overflowY: "auto" }}>
         <div className="ga-drawer-head">
           <div>
             <div className="ga-label">{initial ? "Edit lesson" : "New lesson"}</div>
-            <h2 style={{ fontSize: 25, margin: "7px 0" }}>{initial ? "Edit lesson" : "Add lesson"}</h2>
+            <h2 style={{ fontSize: 24, margin: "6px 0" }}>{initial ? "Edit lesson" : "Add lesson"}</h2>
           </div>
           <button className="ga-icon" onClick={onClose}>
             <X size={18} />
@@ -326,22 +387,132 @@ function LessonDrawer({
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="e.g. Scientific Method & Writing Hypotheses"
+            placeholder="e.g. Welcome to Guidr"
           />
         </label>
 
         <label className="ga-field">
-          One-Sentence Description *
-          <input
-            value={form.description || ""}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="e.g. Master the foundational steps of scientific inquiry and craft clear, testable research hypotheses."
-          />
+          Assigned Module *
+          <select
+            value={form.module || "Know"}
+            onChange={(e) => setForm({ ...form, module: e.target.value })}
+            style={{ background: "#181818", border: "1px solid #3d3d3d", color: "#fff", padding: "8px 10px" }}
+          >
+            <option value="Know">Module 1: Know (Understand opportunities)</option>
+            <option value="Prepare">Module 2: Prepare (Build profile & prep)</option>
+            <option value="Act">Module 3: Act (Apply & track)</option>
+          </select>
         </label>
 
-        {/* Content Mode Selector: Write vs. Import Google Doc vs. File Upload */}
+        {/* VIDEO UPLOAD & MANAGEMENT SECTION */}
+        <div style={{ background: "#181818", border: "1px solid #333", borderRadius: 8, padding: 14, margin: "16px 0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, color: "#fff", fontWeight: 700, fontSize: 13 }}>
+            <Video size={16} color="#bd3b3f" /> Manage & Assign Lesson Video
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <button
+              type="button"
+              onClick={() => setVideoInputMode("url")}
+              style={{
+                flex: 1,
+                padding: "6px 10px",
+                background: videoInputMode === "url" ? "#bd3b3f" : "#222",
+                color: "#fff",
+                border: "1px solid #444",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Video URL / Embed
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setVideoInputMode("file");
+                videoFileInputRef.current?.click();
+              }}
+              style={{
+                flex: 1,
+                padding: "6px 10px",
+                background: videoInputMode === "file" ? "#bd3b3f" : "#222",
+                color: "#fff",
+                border: "1px solid #444",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+              }}
+            >
+              <Upload size={12} /> Upload Video File
+            </button>
+            <input
+              ref={videoFileInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoFileUpload}
+              style={{ display: "none" }}
+            />
+          </div>
+
+          <input
+            type="text"
+            value={form.videoUrl || ""}
+            onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+            placeholder="Paste video URL (e.g. YouTube link or https://example.com/video.mp4)..."
+            style={{
+              width: "100%",
+              background: "#111",
+              border: "1px solid #444",
+              borderRadius: 6,
+              padding: "8px 10px",
+              color: "#fff",
+              fontSize: 12,
+              marginBottom: 10,
+            }}
+          />
+
+          {/* Video Preview in Drawer */}
+          {form.videoUrl ? (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 11, color: "#aaa", marginBottom: 6 }}>Video Live Preview:</div>
+              {form.videoUrl.includes("youtube.com") || form.videoUrl.includes("youtu.be") ? (
+                <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
+                  <iframe
+                    src={
+                      form.videoUrl.includes("watch?v=")
+                        ? `https://www.youtube.com/embed/${form.videoUrl.split("v=")[1]?.split("&")[0]}`
+                        : `https://www.youtube.com/embed/${form.videoUrl.split("youtu.be/")[1]?.split("?")[0]}`
+                    }
+                    title="Preview"
+                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
+                  />
+                </div>
+              ) : (
+                <video src={form.videoUrl} controls style={{ width: "100%", maxHeight: 200, background: "#000" }} />
+              )}
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, videoUrl: "" })}
+                style={{ background: "transparent", border: 0, color: "#f87171", fontSize: 11, cursor: "pointer", marginTop: 6 }}
+              >
+                Remove Video
+              </button>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, color: "#777", fontStyle: "italic" }}>No video assigned yet to this lesson.</div>
+          )}
+        </div>
+
+        {/* Content Mode Selector */}
         <div className="ga-field" style={{ marginBottom: 18 }}>
-          <label style={{ fontWeight: 600, display: "block", marginBottom: 8 }}>Lesson Content Source</label>
+          <label style={{ fontWeight: 600, display: "block", marginBottom: 8 }}>Lesson Text Content Source</label>
           <div style={{ display: "flex", gap: 8 }}>
             <button
               type="button"
@@ -419,7 +590,7 @@ function LessonDrawer({
           </div>
         </div>
 
-        {/* Google Doc Link Import Panel */}
+        {/* Google Doc Import */}
         {inputMode === "gdoc" && (
           <div style={{ background: "#1e1e1e", border: "1px solid #333", borderRadius: 8, padding: 14, marginBottom: 18 }}>
             <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 6, color: "#fff" }}>
@@ -465,7 +636,7 @@ function LessonDrawer({
           <textarea
             value={form.content || ""}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
-            rows={9}
+            rows={8}
             placeholder="Enter or import lesson material. This content will automatically train your Guidr Tutor AI assistant..."
             style={{
               width: "100%",
