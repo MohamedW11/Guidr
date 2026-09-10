@@ -1,25 +1,17 @@
-import { pgTable, uuid, varchar, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { pgTable, uuid, varchar, text, boolean, timestamp } from "drizzle-orm/pg-core";
 
-export const userRoleEnum = pgEnum("user_role", ["student", "admin"]);
-
+/**
+ * Global User Identity Table
+ * Section 14.1 in Guidr V1 Specification
+ */
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
+  fullName: varchar("full_name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  role: userRoleEnum("role").notNull().default("student"),
+  phone: varchar("phone", { length: 50 }),
+  photoUrl: text("photo_url"),
+  passwordHash: text("password_hash"),
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
-
-export const insertUserSchema = createInsertSchema(usersTable).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const selectUserSchema = createSelectSchema(usersTable);
-
-export type InsertUser = typeof usersTable.$inferInsert;
-export type User = typeof usersTable.$inferSelect;

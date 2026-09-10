@@ -11,6 +11,7 @@
     "db:down": "docker compose down",
     "db:push": "tsx scripts/run-with-env.ts pnpm --filter @workspace/db run push",
     "db:seed": "pnpm --filter @workspace/scripts run seed",
+    "test:security": "tsx scripts/run-with-env.ts pnpm --filter @workspace/scripts run test:security",
     "db:setup": "pnpm run db:up && pnpm run db:push && pnpm run db:seed",
     "dev:api": "tsx scripts/run-with-env.ts pnpm --filter @workspace/api-server run dev",
     "dev:web": "tsx scripts/run-with-env.ts pnpm --filter @workspace/mockup-sandbox run dev",

@@ -1,9 +1,12 @@
+/**
+ * Guidr V1 Master Database Schema Export Entry Point
+ */
+
 export * from "./users";
-export * from "./student_profiles";
-export * from "./admin_profiles";
-export * from "./opportunities";
-export * from "./saved_opportunities";
-export * from "./lessons";
-export * from "./lesson_chunks";
-export * from "./lesson_progress";
-export * from "./chat_messages";
+export * from "./organizations";
+export * from "./memberships";
+export * from "./people";
+export * from "./clubs";
+export * from "./schedules";
+export * from "./operations";
+export * from "./admin";

@@ -1,55 +1,31 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useAuth } from "../lib/AuthContext";
-import { useLocation } from "./mockups/guidr/_shared/router";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole: "student" | "admin";
+  requiredRole?: string;
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        if (requiredRole === "admin") {
-          setLocation("/guidr-admin/Login");
-        } else {
-          setLocation("/guidr/Login");
-        }
-      } else if (user.role !== requiredRole) {
-        if (user.role === "admin") {
-          setLocation("/guidr-admin/Dashboard");
-        } else {
-          setLocation("/guidr/Dashboard");
-        }
-      }
-    }
-  }, [user, isLoading, requiredRole, setLocation]);
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#111",
-          color: "#fff",
-          fontSize: 14,
-          fontFamily: "sans-serif",
-        }}
-      >
-        Loading session...
+      <div className="flex h-screen w-screen items-center justify-center bg-background text-foreground">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-medium text-muted-foreground">Verifying access...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user || user.role !== requiredRole) {
-    return null;
+  if (!user) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background text-foreground">
+        <p className="text-sm text-muted-foreground">Authentication required.</p>
+      </div>
+    );
   }
 
   return <>{children}</>;

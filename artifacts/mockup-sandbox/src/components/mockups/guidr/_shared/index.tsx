@@ -82,12 +82,13 @@ import { Menu, X } from "lucide-react";
 
 export function Shell({ active, children }: { active: string; children: React.ReactNode }) {
   const { user } = useAuth();
-  const profile = user?.studentProfile;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const displayName = profile?.firstName ? `${profile.firstName} ${profile.lastName || ""}`.trim() : "Student";
-  const initials = profile?.firstName ? `${profile.firstName[0]}${profile.lastName ? profile.lastName[0] : ""}`.toUpperCase() : "ST";
-  const subText = profile?.grade ? `Grade ${profile.grade} · ${profile.governorate || "Egypt"}` : "Student Portal";
+  const displayName = user?.fullName || "Student";
+  const initials = user?.fullName
+    ? user.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "ST";
+  const subText = "Student Portal";
 
   return (
     <div className="workspace guidr">

@@ -1,47 +1,44 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-export interface UserSession {
+export interface UserIdentity {
   id: string;
   email: string;
-  role: "student" | "admin";
-  studentProfile?: {
-    id: string;
-    userId: string;
-    firstName: string;
-    lastName: string;
-    phone?: string | null;
-    school?: string | null;
-    governorate?: string | null;
-    grade?: number | null;
-    interests?: string[] | null;
-  };
-  adminProfile?: {
-    id: string;
-    userId: string;
-    name: string;
-    phone?: string | null;
-    role: "admin" | "super_admin";
-  };
+  fullName: string;
+}
+
+export interface UserOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string | null;
+  membershipId: string;
+  roles: string[]; // ADMIN, ADVISOR, STUDENT, PARENT
 }
 
 interface AuthContextType {
-  user: UserSession | null;
+  user: UserIdentity | null;
+  organizations: UserOrganization[];
+  activeOrganization: UserOrganization | null;
   isLoading: boolean;
-  setUser: (user: UserSession | null) => void;
+  setActiveOrganization: (org: UserOrganization | null) => void;
   refetchUser: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  organizations: [],
+  activeOrganization: null,
   isLoading: true,
-  setUser: () => {},
+  setActiveOrganization: () => {},
   refetchUser: async () => {},
   logout: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserSession | null>(null);
+  const [user, setUser] = useState<UserIdentity | null>(null);
+  const [organizations, setOrganizations] = useState<UserOrganization[]>([]);
+  const [activeOrganization, setActiveOrganization] = useState<UserOrganization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const refetchUser = async () => {
@@ -49,12 +46,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch("/api/auth/me", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        setUser(data);
+        setUser(data.user);
+        setOrganizations(data.organizations || []);
+
+        // Auto-select single organization if available
+        if (data.organizations && data.organizations.length === 1) {
+          setActiveOrganization(data.organizations[0]);
+        }
       } else {
         setUser(null);
+        setOrganizations([]);
+        setActiveOrganization(null);
       }
     } catch (err) {
       setUser(null);
+      setOrganizations([]);
+      setActiveOrganization(null);
     } finally {
       setIsLoading(false);
     }
@@ -69,10 +76,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     } catch (err) {}
     setUser(null);
+    setOrganizations([]);
+    setActiveOrganization(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, setUser, refetchUser, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        organizations,
+        activeOrganization,
+        isLoading,
+        setActiveOrganization,
+        refetchUser,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

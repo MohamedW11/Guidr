@@ -1,32 +1,33 @@
 openapi: 3.1.0
 info:
-  title: Api
-  version: 0.1.0
-  description: Guidr Education Hub API Specification
+  title: Guidr V1 API Specification
+  version: 1.0.0
+  description: Multi-Tenant Student Life Platform API Specification
 servers:
   - url: /api
     description: Base API path
+
 tags:
   - name: health
-    description: Health check
+    description: System Health check
   - name: auth
-    description: Authentication & user session
-  - name: student
-    description: Student profile operations
-  - name: interest-discovery
-    description: Interest discovery assessment for onboarding
-  - name: opportunities
-    description: Opportunity discovery & saving
-  - name: lessons
-    description: Guidr Tutor lessons
-  - name: tutor
-    description: Guidr Tutor AI Chat & RAG
-  - name: admin-opportunities
-    description: Admin opportunity management
-  - name: admin-lessons
-    description: Admin lesson & module management
-  - name: admin-settings
-    description: Admin settings & account management
+    description: Authentication & Multi-tenant User Sessions
+  - name: organizations
+    description: Organization Tenants Management
+  - name: users
+    description: School Roster & User Domain Operations
+  - name: imports
+    description: CSV User Roster Bulk Imports
+  - name: children
+    description: Parent Child-Switching & Family Operations
+  - name: locations
+    description: School Campus Locations Catalog
+  - name: clubs
+    description: School Clubs & Advisor Assignments
+  - name: memberships
+    description: Two-Stage Club Membership Approval Workflow & Lifecycle
+  - name: operations
+    description: Schedules, Sessions, Attendance, Announcements, Resources, and Badges
 
 paths:
   /healthz:
@@ -37,1095 +38,266 @@ paths:
       responses:
         "200":
           description: Healthy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
-
-  /auth/signup:
-    post:
-      operationId: signupStudent
-      tags: [auth]
-      summary: Register a new student user with 3-step profile details
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SignupRequest"
-      responses:
-        "201":
-          description: Student successfully registered
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AuthUserResponse"
-        "400":
-          description: Validation error or email already exists
 
   /auth/login:
     post:
-      operationId: loginUser
+      operationId: login
       tags: [auth]
-      summary: Login for student or admin
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoginRequest"
+      summary: User login
       responses:
         "200":
-          description: Successfully authenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AuthUserResponse"
-        "401":
-          description: Invalid credentials
+          description: Login successful
 
   /auth/logout:
     post:
-      operationId: logoutUser
+      operationId: logout
       tags: [auth]
-      summary: Logout current user session
+      summary: User logout
       responses:
         "200":
-          description: Successfully logged out
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
+          description: Logout successful
 
   /auth/me:
     get:
       operationId: getCurrentUser
       tags: [auth]
-      summary: Get currently authenticated user and profile
+      summary: Get current authenticated user identity and organization memberships
       responses:
         "200":
-          description: Current user profile
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AuthUserResponse"
-        "401":
-          description: Not authenticated
+          description: Active user session info
 
-  /student/profile:
+  /organizations:
     get:
-      operationId: getStudentProfile
-      tags: [student]
-      summary: Get student profile
+      operationId: listUserOrganizations
+      tags: [organizations]
+      summary: List organizations accessible by current user
       responses:
         "200":
-          description: Student profile data
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentProfile"
-    put:
-      operationId: updateStudentProfile
-      tags: [student]
-      summary: Update student profile information and interests
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateStudentProfileRequest"
-      responses:
-        "200":
-          description: Updated student profile
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentProfile"
+          description: Organization tenants list
 
-  /interest-discovery/config:
+  /organizations/{orgId}/users:
     get:
-      operationId: getInterestDiscoveryConfig
-      tags: [interest-discovery]
-      summary: Get the public interest discovery assessment configuration
-      parameters:
-        - name: version
-          in: query
-          required: false
-          schema:
-            type: string
-            default: v1
+      operationId: listSchoolUsers
+      tags: [users]
+      summary: List school users filtered by role
       responses:
         "200":
-          description: Assessment configuration for the requested version
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InterestDiscoveryConfigResponse"
-        "404":
-          description: Unknown assessment version
+          description: Roster users list
 
-  /interest-discovery/score:
+  /organizations/{orgId}/locations:
+    get:
+      operationId: listLocations
+      tags: [locations]
+      summary: List school campus locations
+      responses:
+        "200":
+          description: Locations list
     post:
-      operationId: scoreInterestDiscoveryAssessment
-      tags: [interest-discovery]
-      summary: Score interest discovery answers deterministically
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InterestDiscoveryScoreRequest"
-      responses:
-        "200":
-          description: Scored interest discovery results
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InterestDiscoveryScoreResponse"
-        "400":
-          description: Invalid answers payload
-
-  /opportunities:
-    get:
-      operationId: listOpportunities
-      tags: [opportunities]
-      summary: List and search active opportunities for students
-      parameters:
-        - name: search
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: category
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: type
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: governorate
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: grade
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: List of opportunities
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Opportunity"
-
-  /opportunities/{id}:
-    get:
-      operationId: getOpportunityById
-      tags: [opportunities]
-      summary: Get opportunity detail by ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Opportunity details
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Opportunity"
-        "404":
-          description: Opportunity not found
-
-  /opportunities/{id}/save:
-    post:
-      operationId: saveOpportunity
-      tags: [opportunities]
-      summary: Save an opportunity for student
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Saved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-    delete:
-      operationId: unsaveOpportunity
-      tags: [opportunities]
-      summary: Unsave an opportunity for student
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Unsaved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-  /opportunities/saved:
-    get:
-      operationId: listSavedOpportunities
-      tags: [opportunities]
-      summary: Get student saved opportunities
-      responses:
-        "200":
-          description: List of saved opportunities
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Opportunity"
-
-  /lessons:
-    get:
-      operationId: listLessons
-      tags: [lessons]
-      summary: List published and available Guidr Tutor lessons for student
-      responses:
-        "200":
-          description: List of lessons
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Lesson"
-
-  /lessons/{id}:
-    get:
-      operationId: getLessonById
-      tags: [lessons]
-      summary: Get single lesson details
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Lesson details
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LessonDetail"
-
-  /lessons/{id}/progress:
-    post:
-      operationId: toggleLessonProgress
-      tags: [lessons]
-      summary: Mark lesson completed or in progress
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                completed:
-                  type: boolean
-              required: [completed]
-      responses:
-        "200":
-          description: Progress updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-  /lessons/{id}/chat:
-    post:
-      operationId: sendLessonChatMessage
-      tags: [tutor]
-      summary: Send question to Guidr Tutor AI RAG assistant for a specific lesson
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-              required: [message]
-      responses:
-        "200":
-          description: AI Tutor response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TutorChatResponse"
-
-  /lessons/{id}/chat/history:
-    get:
-      operationId: getLessonChatHistory
-      tags: [tutor]
-      summary: Get chat conversation history for a specific lesson
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: List of chat messages
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ChatMessage"
-
-  /admin/opportunities:
-    get:
-      operationId: adminListOpportunities
-      tags: [admin-opportunities]
-      summary: List all opportunities (draft, active, archived) for admin
-      responses:
-        "200":
-          description: List of all opportunities
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Opportunity"
-    post:
-      operationId: adminCreateOpportunity
-      tags: [admin-opportunities]
-      summary: Create new opportunity
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOpportunityRequest"
+      operationId: createLocation
+      tags: [locations]
+      summary: Create a campus location
       responses:
         "201":
-          description: Created opportunity
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Opportunity"
+          description: Location created
 
-  /admin/opportunities/{id}:
-    put:
-      operationId: adminUpdateOpportunity
-      tags: [admin-opportunities]
-      summary: Update existing opportunity
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOpportunityRequest"
-      responses:
-        "200":
-          description: Updated opportunity
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Opportunity"
-    delete:
-      operationId: adminDeleteOpportunity
-      tags: [admin-opportunities]
-      summary: Delete or archive opportunity
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Deleted opportunity
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-  /admin/opportunities/{id}/status:
-    patch:
-      operationId: adminUpdateOpportunityStatus
-      tags: [admin-opportunities]
-      summary: Change status (draft, active, archived)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum: [draft, active, archived]
-              required: [status]
-      responses:
-        "200":
-          description: Status updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Opportunity"
-
-  /admin/lessons:
+  /organizations/{orgId}/clubs:
     get:
-      operationId: adminListLessons
-      tags: [admin-lessons]
-      summary: List all lessons for admin
+      operationId: listClubs
+      tags: [clubs]
+      summary: List clubs in catalog
       responses:
         "200":
-          description: List of all lessons
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Lesson"
+          description: Clubs catalog
     post:
-      operationId: adminCreateLesson
-      tags: [admin-lessons]
-      summary: Create new lesson and trigger RAG chunking
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateLessonRequest"
+      operationId: createClub
+      tags: [clubs]
+      summary: Create a school club
       responses:
         "201":
-          description: Created lesson
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Lesson"
+          description: Club created
 
-  /admin/lessons/{id}:
-    put:
-      operationId: adminUpdateLesson
-      tags: [admin-lessons]
-      summary: Update lesson content, status, module
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateLessonRequest"
-      responses:
-        "200":
-          description: Updated lesson
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Lesson"
-    delete:
-      operationId: adminDeleteLesson
-      tags: [admin-lessons]
-      summary: Delete lesson
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Deleted lesson
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-  /admin/lessons/reorder:
-    patch:
-      operationId: adminReorderLessons
-      tags: [admin-lessons]
-      summary: Update sort order of lessons
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  sortOrder:
-                    type: integer
-                required: [id, sortOrder]
-      responses:
-        "200":
-          description: Reordered successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-  /admin/settings:
+  /organizations/{orgId}/clubs/explore:
     get:
-      operationId: adminGetSettings
-      tags: [admin-settings]
-      summary: Get admin profile and settings
+      operationId: exploreClubs
+      tags: [clubs]
+      summary: Student discovery feed for grade-eligible active clubs
       responses:
         "200":
-          description: Admin profile settings
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminProfile"
-    put:
-      operationId: adminUpdateProfile
-      tags: [admin-settings]
-      summary: Update admin profile details
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                phone:
-                  type: string
-              required: [name]
+          description: Eligible active clubs
+
+  /organizations/{orgId}/clubs/{clubId}/join:
+    post:
+      operationId: joinClub
+      tags: [memberships]
+      summary: Student submits join request for a club (PENDING_PARENT_APPROVAL)
+      responses:
+        "201":
+          description: Join request submitted
+
+  /organizations/{orgId}/club-memberships:
+    get:
+      operationId: listClubMemberships
+      tags: [memberships]
+      summary: Query club memberships filtered by role, status, clubId, studentId
       responses:
         "200":
-          description: Updated profile
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminProfile"
+          description: List of club memberships
 
-  /admin/settings/password:
-    put:
-      operationId: adminUpdatePassword
-      tags: [admin-settings]
-      summary: Change admin password
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                currentPassword:
-                  type: string
-                newPassword:
-                  type: string
-              required: [currentPassword, newPassword]
+  /organizations/{orgId}/club-memberships/{id}/parent-approve:
+    post:
+      operationId: parentApproveMembership
+      tags: [memberships]
+      summary: Parent approves student request (PENDING_PARENT_APPROVAL -> PENDING_ADVISOR_APPROVAL)
       responses:
         "200":
-          description: Password updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
+          description: Parent approval granted
 
-components:
-  schemas:
-    HealthStatus:
-      type: object
-      properties:
-        status:
-          type: string
-      required: [status]
+  /organizations/{orgId}/club-memberships/{id}/parent-reject:
+    post:
+      operationId: parentRejectMembership
+      tags: [memberships]
+      summary: Parent rejects student request (PENDING_PARENT_APPROVAL -> PARENT_REJECTED)
+      responses:
+        "200":
+          description: Parent rejection processed
 
-    SuccessResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-      required: [success]
+  /organizations/{orgId}/club-memberships/{id}/advisor-approve:
+    post:
+      operationId: advisorApproveMembership
+      tags: [memberships]
+      summary: Advisor approves request (PENDING_ADVISOR_APPROVAL -> ACTIVE)
+      responses:
+        "200":
+          description: Advisor approval granted and membership activated
 
-    AuthUserResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        email:
-          type: string
-        role:
-          type: string
-          enum: [student, admin]
-        studentProfile:
-          $ref: "#/components/schemas/StudentProfile"
-        adminProfile:
-          $ref: "#/components/schemas/AdminProfile"
-      required: [id, email, role]
+  /organizations/{orgId}/club-memberships/{id}/advisor-reject:
+    post:
+      operationId: advisorRejectMembership
+      tags: [memberships]
+      summary: Advisor rejects request (PENDING_ADVISOR_APPROVAL -> ADVISOR_REJECTED)
+      responses:
+        "200":
+          description: Advisor rejection processed
 
-    InterestDiscoveryScale:
-      type: object
-      properties:
-        min:
-          type: integer
-        max:
-          type: integer
-        labels:
-          type: array
-          items:
-            type: string
-          minItems: 5
-          maxItems: 5
-      required: [min, max, labels]
+  /organizations/{orgId}/club-memberships/{id}/withdraw:
+    post:
+      operationId: withdrawMembership
+      tags: [memberships]
+      summary: Student or parent withdraws membership request
+      responses:
+        "200":
+          description: Membership withdrawn
 
-    InterestDiscoveryQuestion:
-      type: object
-      properties:
-        id:
-          type: string
-        text:
-          type: string
-      required: [id, text]
+  /organizations/{orgId}/clubs/{clubId}/schedules:
+    get:
+      operationId: listClubSchedules
+      tags: [operations]
+      summary: List recurring club schedules
+      responses:
+        "200":
+          description: List of club schedules
+    post:
+      operationId: createClubSchedule
+      tags: [operations]
+      summary: Create recurring schedule entry
+      responses:
+        "201":
+          description: Schedule created
 
-    InterestDiscoveryResultsCopy:
-      type: object
-      properties:
-        introTitle:
-          type: string
-        introBody:
-          type: string
-        resultsTitle:
-          type: string
-        resultsFooter:
-          type: string
-        disclaimer:
-          type: string
-      required: [introTitle, introBody, resultsTitle, resultsFooter, disclaimer]
+  /organizations/{orgId}/clubs/{clubId}/sessions:
+    get:
+      operationId: listClubSessions
+      tags: [operations]
+      summary: List club session occurrences
+      responses:
+        "200":
+          description: List of sessions
+    post:
+      operationId: createClubSession
+      tags: [operations]
+      summary: Schedule single session occurrence
+      responses:
+        "201":
+          description: Session created
 
-    InterestDiscoveryConfigResponse:
-      type: object
-      properties:
-        version:
-          type: string
-        scale:
-          $ref: "#/components/schemas/InterestDiscoveryScale"
-        questions:
-          type: array
-          items:
-            $ref: "#/components/schemas/InterestDiscoveryQuestion"
-        results:
-          $ref: "#/components/schemas/InterestDiscoveryResultsCopy"
-      required: [version, scale, questions, results]
+  /organizations/{orgId}/club-sessions/{sessionId}/attendance:
+    get:
+      operationId: getSessionAttendance
+      tags: [operations]
+      summary: Get active members roster and attendance status for a session
+      responses:
+        "200":
+          description: Attendance roster
+    post:
+      operationId: recordSessionAttendance
+      tags: [operations]
+      summary: Record or update attendance for session members
+      responses:
+        "200":
+          description: Attendance updated
 
-    InterestDiscoveryScoreRequest:
-      type: object
-      properties:
-        version:
-          type: string
-          default: v1
-        answers:
-          type: object
-          additionalProperties:
-            type: integer
-            minimum: 1
-            maximum: 5
-      required: [answers]
+  /organizations/{orgId}/clubs/{clubId}/announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [operations]
+      summary: List club announcements
+      responses:
+        "200":
+          description: List of announcements
+    post:
+      operationId: postAnnouncement
+      tags: [operations]
+      summary: Post a club broadcast announcement
+      responses:
+        "201":
+          description: Announcement published
 
-    ScoredInterestResult:
-      type: object
-      properties:
-        id:
-          type: string
-        label:
-          type: string
-        score:
-          type: number
-      required: [id, label, score]
+  /organizations/{orgId}/clubs/{clubId}/resources:
+    get:
+      operationId: listResources
+      tags: [operations]
+      summary: List club resources and document links
+      responses:
+        "200":
+          description: List of resources
+    post:
+      operationId: createResource
+      tags: [operations]
+      summary: Upload or share a club resource link
+      responses:
+        "201":
+          description: Resource uploaded
 
-    InterestDiscoveryScoreResponse:
-      type: object
-      properties:
-        version:
-          type: string
-        topInterests:
-          type: array
-          items:
-            $ref: "#/components/schemas/ScoredInterestResult"
-        summarySignals:
-          type: array
-          items:
-            type: string
-        summaryText:
-          type: string
-        disclaimer:
-          type: string
-      required: [version, topInterests, summarySignals, summaryText, disclaimer]
+  /organizations/{orgId}/badges:
+    get:
+      operationId: listBadges
+      tags: [operations]
+      summary: List school badge templates
+      responses:
+        "200":
+          description: List of badge templates
+    post:
+      operationId: createBadge
+      tags: [operations]
+      summary: Create a badge template
+      responses:
+        "201":
+          description: Badge created
 
-    SignupRequest:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-        firstName:
-          type: string
-        lastName:
-          type: string
-        phone:
-          type: string
-        school:
-          type: string
-        governorate:
-          type: string
-        grade:
-          type: integer
-        interests:
-          type: array
-          items:
-            type: string
-      required: [email, password, firstName, lastName, governorate, grade]
+  /organizations/{orgId}/students/{studentId}/badges:
+    get:
+      operationId: getStudentBadges
+      tags: [operations]
+      summary: Fetch badges awarded to student
+      responses:
+        "200":
+          description: List of student badges
+    post:
+      operationId: awardStudentBadge
+      tags: [operations]
+      summary: Award a badge to student
+      responses:
+        "201":
+          description: Badge awarded
 
-    LoginRequest:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-      required: [email, password]
 
-    StudentProfile:
-      type: object
-      properties:
-        id:
-          type: string
-        userId:
-          type: string
-        firstName:
-          type: string
-        lastName:
-          type: string
-        phone:
-          type: string
-        school:
-          type: string
-        governorate:
-          type: string
-        grade:
-          type: integer
-        interests:
-          type: array
-          items:
-            type: string
-      required: [id, userId, firstName, lastName]
-
-    UpdateStudentProfileRequest:
-      type: object
-      properties:
-        firstName:
-          type: string
-        lastName:
-          type: string
-        phone:
-          type: string
-        school:
-          type: string
-        governorate:
-          type: string
-        grade:
-          type: integer
-        interests:
-          type: array
-          items:
-            type: string
-
-    AdminProfile:
-      type: object
-      properties:
-        id:
-          type: string
-        userId:
-          type: string
-        name:
-          type: string
-        phone:
-          type: string
-        role:
-          type: string
-          enum: [admin, super_admin]
-      required: [id, userId, name, role]
-
-    Opportunity:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        categories:
-          type: array
-          items:
-            type: string
-        types:
-          type: array
-          items:
-            type: string
-        description:
-          type: string
-        organization:
-          type: string
-        deadlineDate:
-          type: string
-          nullable: true
-        deadlineTime:
-          type: string
-          nullable: true
-        locationType:
-          type: string
-          enum: [online, in_person, hybrid]
-        locationDetails:
-          type: string
-          nullable: true
-        gradeMin:
-          type: integer
-          nullable: true
-        gradeMax:
-          type: integer
-          nullable: true
-        specificGrades:
-          type: array
-          items:
-            type: integer
-          nullable: true
-        eligibleGovernorates:
-          type: array
-          items:
-            type: string
-          nullable: true
-        genderRequirement:
-          type: string
-          nullable: true
-        additionalRequirements:
-          type: string
-          nullable: true
-        timeline:
-          type: string
-          nullable: true
-        applicationProcess:
-          type: string
-          nullable: true
-        applicationLink:
-          type: string
-          nullable: true
-        status:
-          type: string
-          enum: [draft, active, archived]
-        isSaved:
-          type: boolean
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-      required: [id, name, categories, description, organization, locationType, status]
-
-    CreateOpportunityRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        categories:
-          type: array
-          items:
-            type: string
-        types:
-          type: array
-          items:
-            type: string
-        description:
-          type: string
-        organization:
-          type: string
-        deadlineDate:
-          type: string
-        deadlineTime:
-          type: string
-        locationType:
-          type: string
-          enum: [online, in_person, hybrid]
-        locationDetails:
-          type: string
-        gradeMin:
-          type: integer
-        gradeMax:
-          type: integer
-        eligibleGovernorates:
-          type: array
-          items:
-            type: string
-        genderRequirement:
-          type: string
-        additionalRequirements:
-          type: string
-        timeline:
-          type: string
-        applicationProcess:
-          type: string
-        applicationLink:
-          type: string
-        status:
-          type: string
-          enum: [draft, active, archived]
-      required: [name, categories, description, organization, locationType, status]
-
-    Lesson:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        module:
-          type: string
-        content:
-          type: string
-        videoUrl:
-          type: string
-          nullable: true
-        status:
-          type: string
-          enum: [draft, published, locked]
-        sortOrder:
-          type: integer
-        completed:
-          type: boolean
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-      required: [id, title, module, status, sortOrder]
-
-    LessonDetail:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        module:
-          type: string
-        content:
-          type: string
-        videoUrl:
-          type: string
-          nullable: true
-        status:
-          type: string
-          enum: [draft, published, locked]
-        sortOrder:
-          type: integer
-        completed:
-          type: boolean
-        chunksCount:
-          type: integer
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-      required: [id, title, module, content, status, sortOrder]
-
-    CreateLessonRequest:
-      type: object
-      properties:
-        title:
-          type: string
-        module:
-          type: string
-        content:
-          type: string
-        videoUrl:
-          type: string
-          nullable: true
-        status:
-          type: string
-          enum: [draft, published, locked]
-        sortOrder:
-          type: integer
-      required: [title, module, content, status]
-
-    ChatMessage:
-      type: object
-      properties:
-        id:
-          type: string
-        studentId:
-          type: string
-        lessonId:
-          type: string
-        role:
-          type: string
-          enum: [student, assistant]
-        content:
-          type: string
-        createdAt:
-          type: string
-      required: [id, studentId, lessonId, role, content, createdAt]
-
-    TutorChatResponse:
-      type: object
-      properties:
-        response:
-          type: string
-        sources:
-          type: array
-          items:
-            type: string
-      required: [response]

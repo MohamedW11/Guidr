@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { Link, useLocation } from "./_shared/router";
 import { AuthHeader } from "./_shared";
 import { useAuth } from "../../../lib/AuthContext";
 import "./_group.css";
 
 export function Login() {
-  const [, setLocation] = useLocation();
   const { refetchUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +29,7 @@ export function Login() {
       try {
         data = text ? JSON.parse(text) : {};
       } catch {
-        data = { message: text || "Server error or database connection failed. Please check DATABASE_URL." };
+        data = { message: text || "Server authentication error." };
       }
 
       if (!res.ok) {
@@ -39,13 +37,16 @@ export function Login() {
       }
 
       await refetchUser();
-      if (data.role === "admin") {
-        setLocation("/guidr-admin/Dashboard");
+
+      if (data.organizations && data.organizations.length > 1) {
+        window.location.href = "/select-organization";
+      } else if (data.organizations && data.organizations.length === 1) {
+        window.location.href = `/${data.organizations[0].slug}/dashboard`;
       } else {
-        setLocation("/guidr/Dashboard");
+        window.location.href = "/select-organization";
       }
     } catch (err: any) {
-      setError(err.message || "Invalid credentials");
+      setError(err.message || "Invalid email or password");
     } finally {
       setIsSubmitting(false);
     }
@@ -56,15 +57,7 @@ export function Login() {
       <AuthHeader
         right={
           <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            <Link
-              href="/guidr-admin/Login"
-              style={{ color: "var(--g-red)", fontSize: 12, textDecoration: "none" }}
-            >
-              Admin Portal
-            </Link>
-            <Link href="/guidr/Signup" style={{ color: "#ffffff", fontSize: 12 }}>
-              Create account
-            </Link>
+            <span style={{ color: "#9b9995", fontSize: 12 }}>Guidr V1 Multi-Tenant Platform</span>
           </div>
         }
       />
@@ -123,13 +116,13 @@ export function Login() {
             {isSubmitting ? "Logging in..." : "Log in"} <ArrowRight size={14} />
           </button>
         </div>
-        <div style={{ marginTop: 22, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11 }}>
-          <p style={{ color: "#9b9995", margin: 0 }}>
-            New to Guidr?{" "}
-            <Link href="/guidr/Signup" style={{ color: "#ffffff" }}>
-              Create an account
-            </Link>
-          </p>
+
+        <div style={{ marginTop: 24, padding: 16, background: "rgba(255,255,255,0.03)", borderRadius: 8, fontSize: 12, color: "#9b9995" }}>
+          <p style={{ fontWeight: 600, color: "#fff", marginBottom: 6 }}>Demo Test Accounts:</p>
+          <p>• Admin: <code>admin@guidred.org</code> / <code>AdminPass123!</code></p>
+          <p>• Advisor: <code>advisor@guidred.org</code> / <code>AdvisorPass123!</code></p>
+          <p>• Student: <code>student@guidred.org</code> / <code>StudentPass123!</code></p>
+          <p>• Parent: <code>parent@guidred.org</code> / <code>ParentPass123!</code></p>
         </div>
       </form>
     </div>
